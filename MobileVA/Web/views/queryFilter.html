@@ -1,0 +1,16 @@
+<div id="queryFilter" ng-controller="queryFilterCtrl">
+    <div class="info-header">
+        <h5> Ego Queries: </h5>
+    </div>
+    <div class="info-message" ng-if="dataLoadFlag == 0">
+        No dataset loaded.
+    </div>
+    <div ng-if="dataLoadFlag == 1">
+        <div id="searchWrapper" class="queryWrapper">
+            <input type="text" class="form-control" placeholder="Ego Name"
+            style="width: 63%; display: inline" ng-model="queryData.searchText">
+            <button type="button" class="btn btn-primary" style="display: inline" ng-click="search()">Search</button>
+            <button type="button" class="btn btn-default" style="display: inline" ng-click="reset()">Reset</button>
+        </div>
+    </div>
+</div>

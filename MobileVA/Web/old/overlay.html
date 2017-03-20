@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<html>
+<head>
+  <link rel="stylesheet" href="overlay.css">
+  <link href="./css/relationship.css" rel="stylesheet">
+  <style>
+  body {
+  font: 10px sans-serif;
+  background-color: transparent;
+  }
+  .group-tick line {
+  stroke: #000;
+  }
+  .ribbons {
+  fill-opacity: 0.67;
+  }
+  .svg-container {
+  display: inline-block;
+  position: relative;
+  width: 100%;
+  /*padding-bottom: 100%;*/
+  vertical-align: top;
+  overflow: hidden;
+  height:100vh;
+
+  }
+  .svg-content {
+  display: inline-block;
+  position: absolute;
+  top: 0;
+  left: 0;
+/*      bottom: 0;
+  right: 0;*/
+  margin-left: auto;
+  margin-right: auto;
+  }
+
+   pre {
+   display:none;
+  }
+  </style>
+</head>
+<body>
+<!-- <div id="container" class="svg-container"></div> -->
+<div class="container">
+  <div class="showcase">
+     <canvas height=600 width=1300></canvas>
+  </div>
+
+</div>
+
+<script src="http://www.decembercafe.org/demo/relation/js/d3.min.js"></script>
+<script src="./js/relation.js"></script>
+
+<script>
+function initColor(r) {
+    r[0].color = "#007FFF", r[1].color = "#A142FF", r[2].color = "#FF85C2", r[3].color = "#FFA142", r[4].color = "#FF4242";
+    for (var o = 5; o < r.length; o++) {
+      console.log(r)
+        var t = d3.color(r[o % 4 + 1].color);
+        r[o].color = t.brighter(1.5).toString()
+    }
+}
+
+function initRadius(r) {
+    r[0].radius = 18, r[1].radius = 14, r[2].radius = 14, r[3].radius = 14, r[4].radius = 14;
+    for (var o = 5; o < r.length; o++) r[o].radius = 10
+}
+var canvas = document.querySelector("canvas"),
+    width = 1300,
+    height = 600;
+d3.csv("./nodes.csv", function(r, o) {
+    for (var t = (o.length, 4), i = [], e = 1; e <= t; e++) i.push({
+        source: 0,
+        target: e
+    });
+    for (var e = t + 1; e < o.length; e++) i.push({
+        source: e % t + 1,
+        target: e
+    });
+    initColor(o), initRadius(o);
+    var s = new relation;
+    s.setNodes(o), s.setLinks(i), s.setCanvas(canvas), s.setSize(width, height), s.setRadius(12), s.setLinkLength(90), s.setCharge(-60), s.init(), s.run()
+})
+
+
+</script>
+</body>
+</html>

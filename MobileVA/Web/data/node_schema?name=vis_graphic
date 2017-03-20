@@ -1,0 +1,1 @@
+[{"alias": "Name", "type": "String", "name": "name"}, {"alias": "Start", "type": "Float", "name": "startYear"}, {"alias": "End", "type": "Float", "name": "endYear"}, {"alias": "Degree", "type": "Float", "name": "neighborLen"}, {"alias": "Pub", "type": "Float", "name": "publication"}]

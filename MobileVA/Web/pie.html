@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html>
+  <head>
+
+<meta charset="utf-8">
+<style>
+
+.links line {
+  stroke: #999;
+  stroke-opacity: 0.6;
+}
+
+.nodes circle {
+  stroke: #fff;
+  stroke-width: 1.5px;
+}
+
+.main-node
+{
+  /*opacity: 0.3;*/
+  stroke: #4285f4;
+  fill: transparent;
+  stroke-width: 3.5px;
+
+}
+body
+{
+    margin: 0 0 0 0;
+    padding: 0 0 0 0;
+    	font-size:12px;
+	-webkit-user-select:none;
+  -webkit-text-size-adjust:none;
+	font-family:helvetica;
+}
+
+.arc text {
+  font: 10px sans-serif;
+  text-anchor: middle;
+}
+
+.arc path {
+  stroke: #fff;
+}
+
+li
+{
+  	padding:0;
+	margin:0;
+	border:0;
+  list-style-type: none;
+  display: inline-block;
+}
+
+ul
+{
+  	padding:0;
+	margin:0;
+	border:0;
+  display: inline-block;
+}
+
+div
+{
+  /*padding-top: 200px;*/
+  width: 400px;
+  overflow: hidden;
+  display: inline-block;
+  /*padding-bottom: -200px;*/
+  ;
+  /*-webkit-mask-image: -webkit-gradient(linear, left 90%, left bottom, from(rgba(0,0,0,1)), to(rgba(0,0,0,0)));*/
+  -webkit-mask-image: -webkit-linear-gradient(top, rgba(0,0,0,0) 0%,rgba(0,0,0,1) 60%,rgba(0,0,0,1) 80%,rgba(0,0,0,0) 100%);
+
+}
+
+/* iSCROOL */
+
+
+#wrapper {
+	position:absolute; z-index:1;
+	top:45px; bottom:48px; left:0;
+	/*width:100%;*/
+	/*background:#aaa;*/
+	overflow:auto;
+}
+
+
+#wrapper ul {
+	list-style:none;
+	padding:0;
+	margin:0;
+	/*width:100%;*/
+	text-align:left;
+}
+
+#wrapper li {
+	padding:0 0 0 0;
+	font-size:0px;
+}
+
+
+
+</style>
+  <!--<li><svg width="414" height="578"></svg></li>-->
+  </head>
+
+<body ng-app="vishope" onload="loaded()">
+
+<div id="wrapper">
+    <ul>
+    </ul>
+</div>
+
+  <!-- YanHong JS Code -->
+  <script src="lib/jquery/dist/jquery.js"></script>
+  <script src="lib/jquery-ui/jquery-ui.js"></script>
+  <script src="lib/lodash/dist/lodash.js"></script>
+  <script src="lib/bootstrap/dist/js/bootstrap.js"></script>
+  <script src="lib/d3/d3.min.js"></script>
+  <script src="lib/d3-tip/index.js"></script>
+  <script src="lib/geom/geom.js"></script>
+  <script src="lib/angular/angular.js"></script>
+  <script src="lib/angular-resource/angular-resource.js"></script>
+  <script src="lib/angular-route/angular-route.js"></script>
+  <script src="lib/angular-bootstrap/ui-bootstrap-tpls.js"></script>
+  <script src="lib/angular-ui-date/src/date.js"></script>
+  <script src="lib/contour-map/conrec.js"></script>
+  <script src="scripts/app.js"></script>
+  <script src="scripts/filter/util.js"></script>
+  <script src="scripts/services/dataService.js"></script>
+  <script src="scripts/services/pipService.js"></script>
+  <script src="scripts/services/egoVisService.js"></script>
+  <script src="scripts/services/overviewVisService.js"></script>
+  <script src="scripts/controllers/mainviewCtrl.js"></script>
+  <script src="scripts/controllers/uiCtrl.js"></script>
+  <script src="scripts/controllers/rightCtrl.js"></script>
+  <script src="scripts/controllers/tableCtrl.js"></script>
+  <script src="scripts/controllers/dataSelectorCtrl.js"></script>
+  <script src="scripts/controllers/queryFilterCtrl.js"></script>
+  <script src="scripts/controllers/overviewCtrl.js"></script>
+  <script src="scripts/directives/tableAttrDirective.js"></script>
+  <script src="scripts/directives/scrollDirective.js"></script>
+  <script src="scripts/directives/egoDirective.js"></script>
+  <script src="scripts/directives/tableDirective.js"></script>
+
+  <!-- User defined scripts -->
+  <script src="query.js"></script>
+  <script src="wkbridge.js"></script>
+  <script src="d3-event.js"></script>
+  <script src="bridge-service.js"></script>
+  <!-- YanHong JS Code -->
+
+
+
+  <script src="iscroll.js"></script>
+
+
+  <script src="lib/underscore-min.js"></script>
+
+
+  <script type="text/javascript">
+
+
+  function loaded () {
+    setTimeout(function () {
+      myScroll.refresh();
+    }, 2000);
+  }
+
+  document.addEventListener('touchmove', function (e) { e.preventDefault(); }, false);
+
+  </script>
+
+
+  <script type="text/javascript">
+
+      var gBridge;
+      var globalSpacing = 2;
+      var myScroll;
+      var text_padding = 20;
+      var text_width = 50;
+
+      $(document).ready(function(){
+        
+        setTimeout(function(){
+          myScroll = new IScroll('#wrapper', {
+          snap: 'li', 
+          disableMouse: true,
+          scrollbars: true,
+          disablePointer: true,
+          deceleration: 0.12
+        });
+
+        myScroll.on('scrollEnd', function(){
+          console.log("Scroll End!!");
+          var currentIndex = -parseInt(myScroll.y / $("svg").height());
+          console.log("Current Index = " + currentIndex);
+          if (gBridge != null) {
+            gBridge.callHandler("onEgoScrollEnd", {index: currentIndex});
+          }
+        });
+
+      }, 200);
+
+
+    
+      var width = 400,
+          height = 200,
+          radius = Math.min(width, height) / 2,
+          border_width = 60;
+
+      var egoName = "Hans-Peter Seidel";
+      if (!isNaN(parseInt(getParameterByName("border"))))
+      {
+        border_width = parseInt(getParameterByName("border"));
+      }
+
+      if (getParameterByName("egoname") != null)
+      {
+        egoName = getParameterByName("egoname");
+      }
+
+      var dataUrl = isEmbeddMode ? "/dataApi/" + egoName + ".json" : "data/hans.json";
+
+      d3.json(dataUrl, function(json){
+        BridgeService.establishBridge(json);
+
+        var egoVisService = BridgeService.getVisService();
+
+        var hans_data = isEmbeddMode ? json : json[0];
+        var distData = BridgeService.genDistributionPreviousYear(hans_data['yearDict']);
+
+        var yearListData = [{year: 0, data: null}];
+        _.map(distData, function(value, key){
+          yearListData.push({year: key, data: value});
+        });
+        yearListData.push({year: 0, data: null});
+
+        
+        // Start D3 Logic
+        var ul = d3.select("ul");
+        var li =  ul.selectAll("li")
+                    .data(yearListData)
+                    .enter()
+                    .append("li");
+        
+        li.each(function(d, i){
+          console.log(i);
+          console.log(d);
+          var year = d.year;
+          var yearData = d.data;
+
+          var pie = d3.layout.pie()
+              .sort(null)
+              .value(function (d) {
+                  return d;
+              });
+
+          var svg = d3.select(this).append('svg');
+          svg.attr("width", width + text_padding + text_width).attr("height", height);
+          if (year == 0) return;
+          
+          var alterArcWrapper = svg.append("g")
+          .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")")
+          .attr("class", "alterArcWrapper");
+
+          svg.append("text")
+          .attr("x", radius - border_width + text_padding)
+          .attr("y", 0)
+          .style('fill', 'steelblue')
+          .style('font-size', '24px')
+          .style('font-weight', 'bold')
+          .text(year);
+
+          var alterArc = alterArcWrapper.selectAll('.alterArc')
+          .data(function (d) {
+
+            var res = [];
+            for (var i = 0; i < d.data.length; i++) {
+                res.push(d.data[i]['cnt']);
+            }
+            var res = pie(res);
+            for (var i = 0; i < res.length; i++) {
+                // res[i]['outerRadius'] = calGlyphRadius(egoData['yearDict'][year]['neighborList'].length);
+                res[i]['outerRadius'] = 50;
+                res[i]['nameList'] = d.data[i]['nameList'];
+                res[i]['totcnt'] = d.data[i]['totcnt'];
+                res[i]['cnt'] = d.data[i]['cnt'];
+                res[i]['title'] = d.data[i]['title'];
+                // res[i]['year'] = d;
+            }
+            return res;
+          })
+          .enter()
+          .append('g')
+          .attr('class', '.alterArc');
+
+      
+          alterArc.append('path')
+          .attr('d', function (d) {
+
+            console.log(d)
+            var arc = d3.svg.arc()
+                .outerRadius(d.outerRadius)
+                .innerRadius(30);
+            return arc(d);
+          })
+          .style('fill', function (d, i) {
+              return egoVisService.arcColor[i];
+          })
+
+          
+        });
+        
+        // Call Objc Handler
+        if (gBridge != null){
+          gBridge.callHandler("onJSONLoadFinish");
+        }
+
+      })
+    });
+
+  function relocate(cx, cy, r)
+  {
+    // console.log(r);
+    // var div_width = $("#wrapper").width();
+    var border_width = (r / 110) * 60;
+    var donut_diameter = 2 * (r + border_width);
+
+    $("#wrapper").width(donut_diameter + text_padding + text_width);
+    $("#wrapper").css({
+      position: "absolute", 
+      left: cx  - 0.5 * donut_diameter,
+      height: (3 * donut_diameter + 2 * globalSpacing), 
+      top: cy - (1.5 * donut_diameter)
+    });
+
+    var svg_width = donut_diameter + text_padding + text_width;
+    var svg_height = donut_diameter
+    
+    // console.log("width = " + svg_width);
+    // console.log("height = " + svg_height);
+
+    d3.selectAll("svg").attr("width", svg_width).attr("height", svg_height);
+    d3.selectAll(".alterArcWrapper").attr("transform",  "translate(" + donut_diameter / 2 + "," + donut_diameter / 2 + ")");
+    
+    d3.selectAll("path").attr("d", d3.svg.arc().outerRadius(donut_diameter / 2).innerRadius(r));
+
+
+    d3.selectAll("text")
+    .attr("x", donut_diameter + text_padding)
+    .attr("y", 1/2 * donut_diameter)
+    // .attr("transform",  "translate(" + donut_diameter / 2 + "," + donut_diameter / 2 + ")")
+    .style('fill', 'white')
+    .style('font-size', '18px');
+
+  }
+
+  </script>
+
+  <!-- OBJC 外部调用 -->
+  <script type="text/javascript">
+
+
+    function scrollDown()
+    {
+      myScroll.scrollBy(0, -$("svg").height() - globalSpacing, 800);
+    }
+
+    function scrollUp()
+    {
+      myScroll.scrollBy(0, $("svg").height() + globalSpacing, 800);
+    }
+
+    function move(cx, cy, r)
+    {
+      relocate(cx, cy, r);
+    }
+
+    // Web Bridge
+
+    $(window).load(function(){
+      if(isEmbeddMode)
+      {
+        // 加载 WebBridge
+        setupWebViewJavascriptBridge(function(bridge){
+          gBridge = bridge;
+        });
+      }
+    });
+
+
+  </script>
+
+
+</body>
+
+
+</html>

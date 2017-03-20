@@ -1,0 +1,30 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "87623BE59273E8798F557DE8C6473BF8F344E376",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "87623BE59273E8798F557DE8C6473BF8F344E376" : 9223372036854775807,
+    "98C38F42EB189807E5436618DA05BF2F2BFBA0BB" : 9223372036854775807
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "52033D37-64FC-4243-A038-40579C5E9C5B",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "87623BE59273E8798F557DE8C6473BF8F344E376" : "MobileVA\/",
+    "98C38F42EB189807E5436618DA05BF2F2BFBA0BB" : "MobileVA\/MobileVA\/Web\/iscroll\/"
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "MobileVA",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "MobileVA.xcworkspace",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "github.com:yijiasu\/MobileVA.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "87623BE59273E8798F557DE8C6473BF8F344E376"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "github.com:cubiq\/iscroll.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "98C38F42EB189807E5436618DA05BF2F2BFBA0BB"
+    }
+  ]
+}

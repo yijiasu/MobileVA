@@ -14,13 +14,44 @@ PODS:
   - AFNetworking/Serialization (3.1.0)
   - AFNetworking/UIKit (3.1.0):
     - AFNetworking/NSURLSession
+  - CocoaAsyncSocket (7.5.1):
+    - CocoaAsyncSocket/GCD (= 7.5.1)
+  - CocoaAsyncSocket/GCD (7.5.1)
+  - CocoaHTTPServer (2.3):
+    - CocoaAsyncSocket
+    - CocoaLumberjack
+  - CocoaLumberjack (3.0.0):
+    - CocoaLumberjack/Default (= 3.0.0)
+    - CocoaLumberjack/Extensions (= 3.0.0)
+  - CocoaLumberjack/Core (3.0.0)
+  - CocoaLumberjack/Default (3.0.0):
+    - CocoaLumberjack/Core
+  - CocoaLumberjack/Extensions (3.0.0):
+    - CocoaLumberjack/Default
+  - PureLayout (3.0.2)
+  - RoutingHTTPServer (1.0.0):
+    - CocoaHTTPServer (~> 2.3)
+  - Underscore.m (0.3.0)
+  - WebViewJavascriptBridge (6.0.0)
 
 DEPENDENCIES:
   - AFNetworking
+  - CocoaHTTPServer
+  - PureLayout
+  - RoutingHTTPServer
+  - Underscore.m
+  - WebViewJavascriptBridge (~> 6.0)
 
 SPEC CHECKSUMS:
   AFNetworking: 5e0e199f73d8626b11e79750991f5d173d1f8b67
+  CocoaAsyncSocket: e0a7e93b2ffa411592ff87e58524fbbc9b95b4fa
+  CocoaHTTPServer: 5624681fc3473d43b18202f635f9b3abb013b530
+  CocoaLumberjack: c823149bccc5519a9447aeb433be7b1212a7d6a5
+  PureLayout: 4d550abe49a94f24c2808b9b95db9131685fe4cd
+  RoutingHTTPServer: fab8b13e725f26720500c146d43c98c11ebc4d47
+  Underscore.m: dc9ca06fe2c9a79d01ce20c3d2c1e8f91f2d92dc
+  WebViewJavascriptBridge: 72392742054bf655504206b4b9574646cfe9b1e7
 
-PODFILE CHECKSUM: 77e1105b05be9051545f9ce15929c160340bcb40
+PODFILE CHECKSUM: a27e1fdfead8783d58443d9c0ea6e889a9470aab
 
 COCOAPODS: 1.2.0

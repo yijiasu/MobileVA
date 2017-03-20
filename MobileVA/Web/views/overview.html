@@ -1,0 +1,49 @@
+<div id="overview" ng-controller="overviewCtrl">
+    <div class="info-header">
+        <h5> Control Options: </h5>
+    </div>
+    <div class="info-message" ng-if="dataLoadFlag == 0">
+        No dataset loaded.
+    </div>
+    <div ng-if="dataLoadFlag == 1" style="margin-top: 10px;">
+        <div id="startRange">
+            <label style="display: inline-block; width: 40%">Start: </label>
+            <select ng-model="config.selectedStartDate"
+                    ng-change="updateStartDate()"
+                    ng-options="date for date in config.startDateRange"
+                    style="display-inline; width: 55%;float: right">
+                <option value="">Start Date</option>
+            </select>
+        </div>
+        <div id="endRange">
+            <label>End: </label>
+            <select ng-model="config.selectedEndDate"
+                    ng-change="updateEndDate()"
+                    ng-options="date for date in config.endDateRange"
+                    style="display-inline; width: 55%;float: right">
+                <option value="">End Date</option>
+            </select>
+        </div>
+        <div id="viewOption">
+            <label style="display: inline-block; width: 40%">View: </label>
+            <select
+                    ng-model="config.selectedView"
+                    ng-init="config.selectedView = config.viewOption[0]"
+                    ng-change="updateViewOption()"
+                    ng-options="option for option in config.viewOption"
+                    style="display-inline; width: 55%;float: right">
+            </select>
+        </div>
+    </div>
+    <div class="info-header">
+        <h5> Density Map: </h5>
+    </div>
+    <div class="info-message" ng-if="dataLoadFlag == 0">
+        No dataset loaded.
+    </div>
+    <div ng-if="dataLoadFlag == 1">
+        <div id=densityMapZone">
+            <svg id="densityMapCanvas" width="100%"></svg>
+        </div>
+    </div>
+</div>

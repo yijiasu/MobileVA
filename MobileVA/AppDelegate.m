@@ -17,6 +17,27 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
+    
+    
+    // Init Data Coordinator
+    NSString *path = [[NSBundle mainBundle] pathForResource:@"data" ofType:@"json" inDirectory:@"Web/data"];
+    NSString *ovPath = [[NSBundle mainBundle] pathForResource:@"ovdata_all" ofType:@"json" inDirectory:@"Web/data"];
+
+    NSLog(@"Load Database File: %@", path);
+
+    VADataCoordinator *coordinator = [[VADataCoordinator alloc] initWithJSONFile:path];
+    [coordinator loadOverviewDataFile:ovPath];
+    
+    [VAUtil util].coordinator = coordinator;
+    [VAUtil util].model = [VADataModel sharedDataModel];
+    
+    // Start HTTP Server
+    [[VAService defaultService] startHTTPServer];
+
+    
+    // Test Query
+    
+    
     return YES;
 }
 

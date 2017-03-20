@@ -1,0 +1,110 @@
+<div id="mainview" ng-controller="mainviewCtrl" style="height: 600px" scrollpos="scrollpos">
+    <div id="egoList">
+        <div id="egoNameZone" style="padding-bottom: 4px">
+            <div class="egoNameHead">
+                Ego List
+            </div>
+            <div ng-repeat="ego in egoList" class="egoName"
+                 ng-class="{expansion: ego.expansion, detached: !ego.synScroll}">
+                {{ego.id | replace}}
+            </div>
+        </div>
+        <div id="middleRightWrapper">
+            <div id="egoControlZone" style="padding-bottom: 4px">
+                <div class="egoControlHead">
+                    Control Buttons
+                </div>
+                <div ng-repeat="ego in egoList" class="egoControl"
+                    ng-class="{expansion: ego.expansion, detached: !ego.synScroll}"
+                    style="position: relative">
+                    <div class="controlBtnWrapper">
+                        <div id="expandButton" class="selection-button level-1-button" ng-click="showBarBtn($index)"
+                            ng-class="{invisible: ego.rect}">
+                            <!--<i class="fa fw fa-search-plus"></i>-->
+                            <i class="fa fw fa-bar-chart"></i>
+                        </div>
+                        <div class="selection-button level-1-button" ng-click="showPieBtn($index)"
+                            ng-class="{invisible: !ego.rect}">
+                            <i class="fa fw fa-pie-chart"></i>
+                            <!--<i class="fa fw fa-search-minus"></i>-->
+                        </div>
+                        <div class="selection-button level-1-button" ng-click="changeScroll($index)"
+                            ng-class="{invisible: !ego.synScroll}">
+                            <i class="fa fw fa-arrows-h"></i>
+                        </div>
+                        <div class="selection-button level-1-button" ng-click="changeScroll($index)"
+                            ng-class="{invisible: ego.synScroll}">
+                            <i class="fa fw fa-ban"></i>
+                        </div>
+                        <div class="selection-button level-1-button" ng-click="removeEgoBtn($index)">
+                            <i class="fa fw fa-times"></i>
+                        </div>
+                    </div>
+                    <div class="controlBtnWrapper" ng-class="{invisible: !ego.expansion}">
+                        <!--<div class="selection-button level-1-button" ng-click="removeEgoBtn($index)">-->
+                            <!--<i class="fa fw fa-sort-numeric-desc"></i>-->
+                        <!--</div>-->
+                        <div class="selection-button level-1-button" ng-class="{invisible: !ego.orderFlag}"
+                            ng-click="changeOrderFlag($index)">
+                            <i class="fa fw fa-sort-numeric-desc"></i>
+                        </div>
+                        <div class="selection-button level-1-button" ng-class="{invisible: ego.orderFlag}"
+                            ng-click="changeOrderFlag($index)">
+                            <i class="fa fw fa-sort-amount-asc"></i>
+                        </div>
+
+                        <div class="selection-button level-1-button" ng-class="{invisible: !ego.performanceFlag}"
+                            ng-click="changePerformanceFlag($index)">
+                            <i class="fa fw fa-share-alt"></i>
+                        </div>
+                        <div class="selection-button level-1-button" ng-class="{invisible: ego.performanceFlag}"
+                            ng-click="changePerformanceFlag($index)">
+                            <i class="fa fw fa-star"></i>
+                        </div>
+                    </div>
+                    <div class="controlFilterWrapper" ng-class="{invisible: !ego.expansion}">
+                                <select ng-model="ego.filterNumber"
+                                    ng-options="num for num in ego.filterRange"
+                                    style="display-inline; ">
+                                    <option value="">Filter Number</option>
+                                </select>
+                    </div>
+                    <div class="expandWrapper" ng-class="{invisible: ego.expansion}"
+                        ng-click="expandEgoBtn($index)">
+                            <i class="fa fw fa-arrow-down"></i>
+                    </div>
+                    <div class="expandWrapper" ng-class="{invisible: !ego.expansion}"
+                        ng-click="shrinkEgoBtn($index)">
+                            <i class="fa fw fa-arrow-up"></i>
+                    </div>
+
+                </div>
+            </div>
+
+            <div id="egoViewZone">
+                <div scroll-directive id="timelineTop" style="overflow-x: scroll; overflow-y: hidden;" class="egoView">
+                    <div id="timelineZone" ng-style="{'width': timelineConfig.width}" style="height: 100%">
+                        <svg id="timelineCanvas" height="40"></svg>
+                    </div>
+                </div>
+                <div ego-directive scroll-directive ng-repeat="ego in egoList" class="egoView"
+                    ng-class="{expansion: ego.expansion, synScroll: ego.synScroll, 
+                    asyncScroll: !ego.synScroll, detached: !ego.synScroll}"
+                    draw-ego-glyph="drawEgoGlyph" draw-syn-scroll="drawSynScroll"
+                    re-arrange-ego-expand="reArrangeEgoExpand"
+                    ego-filter-number="egoFilterNumber"
+                    change-order="changeOrder"
+                    change-glyph="changeGlyph"
+                    change-color="changeColor"
+                    draw-ego-expand="drawEgoExpand" ego-data="ego" syn-flag="{{ego.synScroll}}"
+                    syn-on-going="{{ego.synOnGoing}}">
+                    <!--<svg width="1500" height="48" style="background:#0000aa">-->
+                    <!--</svg>-->
+                    <!--<div style="width: 200%">-->
+                        <!--{{ego.id}}-->
+                    <!--</div>-->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

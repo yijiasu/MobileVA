@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+.links line {
+  stroke: #999;
+  stroke-opacity: 0.6;
+}
+
+.nodes circle {
+  stroke: #fff;
+  stroke-width: 1.5px;
+}
+
+.main-node
+{
+  /*opacity: 0.3;*/
+  /*stroke: #4285f4;*/
+  fill: transparent;
+  stroke-width: 3.5px;
+
+}
+body
+{
+    margin: 0 0 0 0;
+    padding: 0 0 0 0;
+}
+
+</style>
+<svg width="414" height="578"></svg>
+<script src="query.js"></script>
+<script src="bridge.js"></script>
+
+
+<script src="lib/d3.v4.min.js"></script>
+<script src="lib/jquery.min.js"></script>
+<script src="lib/underscore-min.js"></script>
+<script>
+
+var svg = d3.select("svg"),
+    width = +svg.attr("width"),
+    height = +svg.attr("height");
+
+if (isNaN(parseInt(getParameterByName("width"))) || isNaN(parseInt(getParameterByName("height"))))
+{
+  alert("height or width is not specified. default value is used");
+}
+else
+{
+  width = parseInt(getParameterByName("width"));
+  height = parseInt(getParameterByName("height"));
+  svg.attr("width", width);
+  svg.attr("height", height);
+}
+
+var color = d3.scaleOrdinal(d3.schemeCategory20);
+
+var nodes_data = [
+    {id : "a"},
+    {id : "b"},
+    {id : "c"}
+
+  ];
+
+var links_data = [
+
+];
+
+var forceManyBody = d3.forceManyBody()
+    .distanceMin(4).strength(-60);
+
+var simulation = d3.forceSimulation()
+    .force("link", d3.forceLink().id(function(d) { return d.id; }))
+    .force("charge", forceManyBody)
+    .force("center", d3.forceCenter(width / 2, height / 2))
+    .on("tick", ticked);
+
+var g = svg.append("g")//.attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+var link = g.append("g").attr("stroke", "#fff").attr("stroke-width", 1.5).selectAll(".link");
+var node = g.append("g").attr("stroke", "#ccc").attr("stroke-width", 1.5).selectAll(".node");
+
+
+function getRadius(d)
+{
+    // console.log(d);
+    if (d.r)
+    {
+        return d.r;
+    }
+    else
+    {
+        return d.id.indexOf(".") == -1 ? 12 : 6;
+    }
+}
+
+function restart() {
+  node = node.data(nodes_data);
+  node.exit().remove();
+  node = node.enter()
+    .append("circle")
+    .attr("r", getRadius).merge(node);
+    
+  node.attr("r", getRadius);
+  node.attr("stroke", function(d) { return color(d.id); })
+  node.classed("main-node", function(d) { return d.id.indexOf(".") == -1 })
+
+  link = link.data(links_data);
+  link.exit().remove();
+  link = link.enter().append("line").merge(link);
+  
+  
+
+  simulation.nodes(nodes_data);
+  simulation.force("link").links(links_data);
+  simulation.alpha(1).restart();
+
+}
+
+function ticked() {
+  node.attr("cx", function(d) { return d.x; })
+      .attr("cy", function(d) { return d.y; })
+
+  link.attr("x1", function(d) { return d.source.x; })
+      .attr("y1", function(d) { return d.source.y; })
+      .attr("x2", function(d) { return d.target.x; })
+      .attr("y2", function(d) { return d.target.y; });
+}
+
+
+
+
+restart();
+
+</script>

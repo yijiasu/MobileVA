@@ -1,0 +1,144 @@
+#login {
+    min-height: 500px;
+}
+
+#usernameInput {
+    width: 500px;
+    display: inline;
+}
+
+#enterButton {
+    margin-left: 10px;
+}
+
+#login-wrapper, #task-ui, .task-title{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.task {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    height: 90%;
+    border: 2px solid rgba(102, 102, 102, 0.5);
+    border-radius: 15px;
+    cursor: pointer;
+}
+
+.task-des {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    height: 90%;
+}
+
+.task:hover {
+    box-shadow: 0px 0px 0px 8px rgba(238, 238, 238, 0.5);
+}
+
+.task-wrapper {
+    min-height: 500px;
+}
+
+.des-wrapper {
+    min-height: 600px;
+}
+
+.svg-wrapper {
+    min-height: 600px;
+}
+
+.svg-wrapper-2 {
+    min-height: 350px;
+}
+
+.task-title, .title{
+    font-family: Helvetica;
+    color: gray;
+}
+
+.task-mark {
+    margin: 0 auto;
+}
+
+#task1-tooltip {
+    margin-bottom: 20px;
+}
+
+#task1-svg{
+    height: 400px;
+}
+
+#task2-svg-left, #task2-svg-right{
+    height: 350px;
+}
+
+#task1-back, #task1-refresh, #task1-next, #task1-display, #task1-record, #task1-skip, #task2-skip, #task2-back, #task2-refresh, #task2-next, #task2-display {
+    cursor: pointer;
+}
+
+.control {
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+#task1-control .control-ul, #task2-control .control-ul {
+    margin: 0 auto;
+    list-style: none;
+}
+
+#task1-control .control-ul .control-li {
+    width: 20%;
+    float: left;
+}
+
+#task2-control .control-ul .control-li {
+    width: 33%;
+    float: left;
+}
+
+.quality-button {
+    width: 100px;
+    margin: 0 auto;
+    display: block;
+}
+
+.task2-label {
+    margin:0 auto;
+}
+
+.egoView {
+    overflow-x: scroll;
+}
+.egoViewBS {
+    border-bottom: 1px solid #eeeeee;
+    height: 100px;
+    width: 100%;
+    -webkit-transition: height 0.8s;
+    -moz-transition: height 0.8s;
+    transition: height 0.8s;
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+.egoNameBS, .egoControlBS {
+    border-bottom: 1px solid #eeeeee;
+    height: 100px;
+    -webkit-transition: height 0.8s;
+    -moz-transition: height 0.8s;
+    transition: height 0.8s;
+}
+
+.egoNameBS {
+    vertical-align: middle;
+    text-align: center;
+    line-height: 100px;
+}
+
+

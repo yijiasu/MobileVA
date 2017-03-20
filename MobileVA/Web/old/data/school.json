@@ -1,0 +1,65 @@
+{
+    "directed": false,
+    "graph": [],
+    "nodes": [
+        {
+            "id": 0,
+            "label": "SSCI"
+        },
+        {
+            "id": 1,
+            "label": "SHSS"
+        },
+        {
+            "id": 2,
+            "label": "SENG"
+        },
+        {
+            "id": 3,
+            "label": "SBM"
+        }
+    ],
+    "links": [
+        {
+            "source": 0,
+            "target": 0,
+            "weight": 3509
+        },
+        {
+            "source": 0,
+            "target": 2,
+            "weight": 785
+        },
+        {
+            "source": 1,
+            "target": 1,
+            "weight": 85
+        },
+        {
+            "source": 1,
+            "target": 2,
+            "weight": 1
+        },
+        {
+            "source": 1,
+            "target": 3,
+            "weight": 7
+        },
+        {
+            "source": 2,
+            "target": 2,
+            "weight": 2574
+        },
+        {
+            "source": 2,
+            "target": 3,
+            "weight": 12
+        },
+        {
+            "source": 3,
+            "target": 3,
+            "weight": 175
+        }
+    ],
+    "multigraph": false
+}

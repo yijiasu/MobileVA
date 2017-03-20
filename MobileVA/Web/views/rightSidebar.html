@@ -1,0 +1,15 @@
+<div id="right-sidebar" ng-controller="rightCtrl">
+    <h4> Control Panel: </h4>
+    <!--<tabset>-->
+        <!--<tab heading="Node Table" select="rightSidebar.detailedSelect = 'table'" style="cursor: pointer"></tab>-->
+        <!--<tab heading="Node Filter" select="rightSidebar.detailedSelect = 'filter'" style="cursor: pointer"></tab>-->
+    <!--</tabset>-->
+
+    <!--<div ng-if="rightSidebar.detailedSelect == 'table'">-->
+    <div ng-include src="'views/queryFilter.html'">
+    </div>
+    <div>
+        <div table-directive table-config="tableConfig" table-data="currentNodes" ng-controller="tableCtrl" highlight-node="highlightNode(node)">
+        </div>
+    </div>
+</div>

@@ -1,0 +1,114 @@
+<html class="no-js">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>egoSlider: Visual Analysis of Egocentric Network Evolution</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+    <link href="lib/bootstrap/dist/css/bootstrap.css" rel="stylesheet">
+    <link href="lib/jquery-ui/themes/smoothness/jquery-ui.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="lib/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/userstudy.css">
+</head>
+<body ng-app="vishope">
+    <div class="container" id="task-ui">
+        <div  ng-controller="task2TestCtrl">
+        <div class="row title">
+            <h3>
+                Micro-level Task {{tcnt + 1}} Question {{qcnt + 1}}
+            </h3>
+            <div class='col-md-12' style="margin-top: 20px;
+                margin-bottom: 20px; font-size: 16px;">
+                {{questionList[tcnt][qcnt]['title']}}
+            </div>
+        </div>
+        <div>
+            <div class="row">
+                <div ng-class="{hiddenFlag: hiddenFlag}">
+                <div ng-include src="'views/mainview-us.html'" ng-class="{invisible: qcnt % 2 != 0}"></div>
+                <div ng-include src="'views/baseline-us.html'" ng-class="{invisible: qcnt % 2 == 0}"></div>
+                </div>
+            </div>
+            <div class="row control">
+                <div class="col-md-1 title">
+                    <h4 style="text-align: left">
+                        Solution:
+                    </h4>
+                </div>
+                <div class="col-md-2 col-md-offset-4" id="task2-control">
+                    <div class="control-ul">
+                        <select ng-model="selectedAnswer" ng-options="choice for choice in choiceList"
+                            style="width: 100px; margin-top: 15px;">
+                            <option>Select</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-2 col-md-offset-3 title" id="task2-control"
+                    ng-class="{hiddenFlag: hiddenFlag}">
+                    <h4 style="text-align: right">
+                        Timer: {{remainTime}}s
+                    </h4>
+                </div>
+            </div>
+            <div class="row title">
+                <div class="col-md-2" ng-class="{hiddenFlag: hiddenFlag}">
+                    <h3 style="text-align: left">
+                        <a id="task2-skip" ng-click="task2Skip()">Skip</a>
+                    </h3>
+                </div>
+                <div class="col-md-2 col-md-offset-3">
+                    <h3 style="text-align: left">
+                        <a id="task2-display" ng-click="task2Display()">Display</a>
+                    </h3>
+                </div>
+                <div class="col-md-2 col-md-offset-3" ng-class="{hiddenFlag: hiddenFlag || selectedAnswer == undefined}">
+                    <h3 style="text-align: right">
+                        <a id="task2-next" ng-click="task2Next()">Next</a>
+                    </h3>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <script src="lib/jquery/dist/jquery.js"></script>
+    <script src="lib/jquery-ui/jquery-ui.js"></script>
+    <script src="lib/lodash/dist/lodash.js"></script>
+    <script src="lib/bootstrap/dist/js/bootstrap.js"></script>
+    <script src="lib/d3/d3.min.js"></script>
+    <script src="lib/d3-tip/index.js"></script>
+    <script src="lib/geom/geom.js"></script>
+    <script src="lib/angular/angular.js"></script>
+    <script src="lib/angular-resource/angular-resource.js"></script>
+    <script src="lib/angular-route/angular-route.js"></script>
+    <script src="lib/angular-bootstrap/ui-bootstrap-tpls.js"></script>
+    <script src="lib/angular-ui-date/src/date.js"></script>
+    <script src="lib/contour-map/conrec.js"></script>
+
+    <!--<script src="scripts/userstudy/task1_exercise.js"></script>-->
+
+    <script src="scripts/app.js"></script>
+    <script src="scripts/filter/util.js"></script>
+    <script src="scripts/services/dataService.js"></script>
+    <script src="scripts/services/pipService.js"></script>
+    <script src="scripts/services/egoVisService.js"></script>
+    <script src="scripts/services/overviewVisService.js"></script>
+    <script src="scripts/controllers/mainviewCtrl.js"></script>
+    <script src="scripts/controllers/uiCtrl.js"></script>
+    <script src="scripts/controllers/rightCtrl.js"></script>
+    <script src="scripts/controllers/tableCtrl.js"></script>
+    <script src="scripts/controllers/dataSelectorCtrl.js"></script>
+    <script src="scripts/controllers/queryFilterCtrl.js"></script>
+    <script src="scripts/controllers/overviewCtrl.js"></script>
+    <script src="scripts/directives/egoDirective.js"></script>
+    <script src="scripts/directives/tableAttrDirective.js"></script>
+    <script src="scripts/directives/scrollDirective.js"></script>
+    <script src="scripts/directives/tableDirective.js"></script>
+    <script src="scripts/userstudy/baselineCtrl.js"></script>
+    <script src="scripts/userstudy/baselineDirective.js"></script>
+    <script src="scripts/userstudy/baselineService.js"></script>
+    <script src="scripts/userstudy/task2TestCtrl.js"></script>
+</body>
+</html>

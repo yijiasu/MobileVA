@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+.node {
+  cursor: pointer;
+}
+
+.node:hover {
+  stroke: #000;
+  stroke-width: 1.5px;
+}
+
+.node--leaf {
+  fill: white;
+  /*fill: transparent;*/
+}
+
+.label {
+  font: 11px "Helvetica Neue", Helvetica, Arial, sans-serif;
+  text-anchor: middle;
+  text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, -1px 0 0 #fff, 0 -1px 0 #fff;
+}
+
+body
+{
+  /*background-color: #a3f5cf;*/
+  margin: 0 0 0 0;
+}
+
+.label,
+.node--root,
+.node--leaf {
+  pointer-events: none;
+}
+
+</style>
+<svg width="960" height="960">
+
+<defs>
+  <pattern id="image" x="0%" y="0%" height="120%" width="120%" viewBox="40 0 512 512">
+    <image id="imagebox" x="0%" y="0%" width="512" height="512" xlink:href=""></image>
+  </pattern>
+</defs>
+
+</svg>
+<script src="query.js"></script>
+<script src="bridge.js"></script>
+
+
+<script src="lib/d3.v4.min.js"></script>
+<script src="lib/jquery.min.js"></script>
+<script src="lib/underscore-min.js"></script>
+<script>
+
+jQuery.fn.d3Click = function () {
+  this.each(function (i, e) {
+    var evt = new MouseEvent("click");
+    e.dispatchEvent(evt);
+  });
+};
+
+var currentNodeName = "";
+var zoomArray = [];
+
+var svg = d3.select("svg"),
+    margin = 20,
+    width = +svg.attr("width"),
+    height = +svg.attr("height"),
+    diameter = +svg.attr("width");
+
+if (isNaN(parseInt(getParameterByName("width"))) || isNaN(parseInt(getParameterByName("height"))))
+{
+  alert("height or width is not specified. default value is used");
+}
+else
+{
+  width = parseInt(getParameterByName("width"));
+  height = parseInt(getParameterByName("height"));
+  svg.attr("width", width);
+  svg.attr("height", height);
+  diameter = Math.min(width, height);
+}
+
+
+
+var g = svg.append("g").attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+
+var color = d3.scaleLinear()
+    .domain([-1, 5])
+    .range(["hsl(152,80%,80%)", "hsl(228,30%,40%)"])
+    .interpolate(d3.interpolateHcl);
+
+var pack = d3.pack()
+    .size([diameter - margin, diameter - margin])
+    .padding(2);
+
+
+
+var rootData, node, circle;
+d3.json("flare.json", function(error, root) {
+  if (error) throw error;
+  rootData = root;
+  updateData(root);
+  // zoomToNode("LegendRange");
+});
+
+function updateData(root)
+{
+  root = d3.hierarchy(root)
+      .sum(function(d) { return d.size; })
+      .sort(function(a, b) { return b.value - a.value; });
+
+  var focus = root,
+      nodes = pack(root).descendants(),
+      view;
+//(d.data.name == "Interpolator" ? "url(#image)" :
+  circle = g.selectAll("circle")
+    .data(nodes)
+    .enter().append("circle")
+      .attr("id", function(d) { return "cir-" + d.data.name })
+      .attr("class", function(d) { return d.parent ? d.children ? "node" : "node node--leaf" : "node node--root"; })
+      .style("fill", function(d) { return d.children ? color(d.depth) :  null; })
+      .on("click", function(d) { if (focus !== d) zoom(d), d3.event.stopPropagation(); });
+
+  var text = g.selectAll("text")
+    .data(nodes)
+    .enter().append("text")
+      .attr("class", "label")
+      .style("fill-opacity", function(d) { return d.parent === root ? 1 : 0; })
+      .style("display", function(d) { return d.parent === root ? "inline" : "none"; })
+      .text(function(d) { return d.data.name; });
+
+  node = g.selectAll("circle,text");
+
+  svg
+      .style("background", color(-1))
+      .on("click", function() { zoom(root); });
+
+  zoomTo([root.x, root.y, root.r * 2 + margin]);
+}
+
+function zoom(d) {
+  currentNodeName = d.data.name;
+  var focus0 = focus; focus = d;
+
+  var transition = d3.transition()
+      .duration(d3.event.altKey ? 7500 : 750)
+      .tween("zoom", function(d) {
+        var i = d3.interpolateZoom(view, [focus.x, focus.y, focus.r * 2 + margin]);
+        return function(t) { zoomTo(i(t)); };
+      });
+
+  transition.selectAll("text")
+    .filter(function(d) { return d.parent === focus || this.style.display === "inline"; })
+      .style("fill-opacity", function(d) { return d.parent === focus ? 1 : 0; })
+      .on("start", function(d) { if (d.parent === focus) this.style.display = "inline"; })
+      .on("end", function(d) { if (d.parent !== focus) this.style.display = "none"; });
+}
+
+function zoomTo(v) {
+  var k = diameter / v[2]; view = v;
+  node.attr("transform", function(d) { return "translate(" + (d.x - v[0]) * k + "," + (d.y - v[1]) * k + ")"; });
+  circle.attr("r", function(d) { return d.r * k; });
+}
+
+function zoomToNode(name)
+{
+  if (name == "flare"){
+    $("svg").d3Click();
+    return;
+  }
+  $("#cir-" + name).d3Click();
+  // currentNodeName = name;
+  // console.log(d3.select("#cir-" + name));
+  // zoom(d3.select("#cir-" + name));
+}
+
+function tagImage(name)
+{
+    $("#cir-" + name).css({fill: "url(#image)"});
+}
+function setImageData(name, image_data)
+{
+  // if (rootData.children)
+  // {
+  //   _.each(rootData.children, function(child){
+  //     setImageData(child, name, image_data);
+  //   });
+  // }
+  // else
+  // {
+  //   if (rootData.name == name)
+  //   {
+  //     console.log(rootData);
+  //     rootData.image = true;
+    // console.log($("#cir-" + name));
+  // alert("fuck" + name);
+  $("#imagebox").attr("xlink:href",  "data:image/jpeg;base64," + image_data);
+  $("#cir-" + name).css({fill: "url(#image)"});
+
+  //   }
+  // }
+  // updateData(rootData);
+
+}
+
+function gestureZoomOut()
+{
+  if (currentNodeName == "flare" || currentNodeName.length === 0) return;
+
+  zoomArray.push(currentNodeName);
+  findParent(rootData, currentNodeName, function(e){
+    zoomToNode(e);
+  });
+}
+
+function gestureZoomIn()
+{
+  if (zoomArray.length === 0) return "root";
+  var outNodeName = zoomArray.pop();
+  zoomToNode(outNodeName);
+}
+
+function findParent(node, name, callback)
+{
+  var isNode = false;
+  if (node.children)
+  {
+    _.each(node.children, function(child){
+      if (child.name == name) callback(node.name);
+      if (findParent(child, name, callback))
+      {
+        callback(node.name);
+      }
+    });
+  }
+  else
+  {
+    if (node.name == name) return true;
+  }
+}
+</script>

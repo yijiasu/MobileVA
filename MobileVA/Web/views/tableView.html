@@ -1,0 +1,67 @@
+<div id="table-section">
+    <!--<div style="margin-bottom: 40px;">-->
+        <!--<h4 style="margin-right: 50px">Search:</h4>-->
+        <!--<input type="text" ng-model="search.Label" style="width: 100%">-->
+    <!--</div>-->
+    <div class="info-header">
+        <h5> Ego Table: </h5>
+    </div>
+    <div class="info-message" ng-if="tableData == undefined">
+        No dataset loaded.
+    </div>
+    <div class="table-view" ng-if="tableData != undefined">
+        <table class="table table-bordered table-condensed">
+            <thead>
+                <tr>
+                    <th ng-style="{'width': tableConfig.thNodeWidth * 100 + '%'}" colspan="1">Nodes</th>
+                    <th ng-style="{'width': tableConfig.thAttrWidth * 100 + '%'}"
+                        colspan="{{tableConfig.tableAttributes.values|numberOfShownAttributeInComboBox}}">
+                        Attributes
+                    </th>
+                </tr>
+                <tr >
+                    <th ng-style="{'width': tableConfig.thNodeWidth * 100 + '%'}">
+                        Name
+                    </th>
+                    <th ng-repeat="attr in tableConfig.tableAttributes.values"
+                        ng-if="attr.show"
+                        ng-style="{'width': tableConfig.thAttrWidth / tableConfig.tableAttributes.values.length * 100 + '%'}">
+                        {{attr.alias}}
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="node in tableData" class="selectable"
+                ng-click="highlightNode({node:node})">
+                <td ng-class="{selected: node.highlight}">
+                    {{node.name | replace}}
+                </td>
+                <!--<td colspan="{{tableConfig.tableAttributes.values|numberOfShownAttributeInComboBox}}"-->
+                    <!--ng-class="{selected: node.highlight}">-->
+                    <!--<span ng-repeat="attr in tableConfig.tableAttributes.values"-->
+                        <!--style="min-height: 20px"-->
+                        <!--ng-if="attr.show">-->
+                        <!--{{attr.value}}-->
+                    <!--</span>-->
+                <!--</td>-->
+                <td ng-repeat="attr in tableConfig.tableAttributes.values"
+                    ng-class="{selected: node.highlight}"
+                    ng-if="attr.show"
+                    ng-style="{'width': tableConfig.thAttrWidth / tableConfig.tableAttributes.values.length * 100 + '%'}">
+                    {{node[attr.name] | integer}}
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <pagination ng-if="tableData != undefined && tableData.length > 0"
+                total-items="tableConfig.totalLength"
+                ng-model="tableConfig.currentPage"
+                max-size="tableConfig.paginationMaxSize"
+                class="pagination-sm"
+                boundary-links="true"
+                num-pages="tableConfig.numPages"
+                items-per-page="tableConfig.itemsPerPage">
+    </pagination>
+    <!--<pre ng-if="tableData != undefined && tableData.length > 0">Page: {{tableConfig.currentPage}} / {{tableConfig.numPages}}</pre>-->
+</div>

@@ -1,0 +1,325 @@
+<!doctype html>
+<html class="no-js">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MDS</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+    <link href="lib/bootstrap/dist/css/bootstrap.css" rel="stylesheet">
+    <link href="lib/jquery-ui/themes/smoothness/jquery-ui.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="lib/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="styles/main.css">
+    <style>
+      body {
+        overflow: auto;
+        margin: 0 0 0 0;
+        padding: 0 0 0 0;
+        font-size:12px;
+        -webkit-user-select:none;
+        -webkit-text-size-adjust:none;
+        font-family:helvetica;
+        overflow: hidden;
+      }
+    </style>
+</head>
+<body ng-app="vishope">
+  
+  
+  <div id="svgWrapper">
+    <svg id="densityMapCanvas" width="960" height="960">
+      <defs>
+        <pattern id="image" x="0%" y="0%" height="120%" width="120%" viewBox="40 0 512 512">
+          <image id="imagebox" x="0%" y="0%" width="512" height="512" xlink:href=""></image>
+        </pattern>
+      </defs>
+
+    </svg>
+  </div>
+
+
+  <script src="underscore-min.js"></script>
+  <!--<script src="yui-min.js"></script>-->
+  <script src="lib/jquery/dist/jquery.js"></script>
+  <script src="lib/jquery-ui/jquery-ui.js"></script>
+  <script src="lib/jquery.transit.min.js"></script>
+  <script src="lib/lodash/dist/lodash.js"></script>
+  <script src="lib/bootstrap/dist/js/bootstrap.js"></script>
+  <script src="lib/d3/d3.min.js"></script>
+  <script src="lib/d3-tip/index.js"></script>
+  <script src="fisheye.js"></script>
+  <script src="lib/geom/geom.js"></script>
+  <script src="lib/angular/angular.js"></script>
+  <script src="lib/angular-resource/angular-resource.js"></script>
+  <script src="lib/angular-route/angular-route.js"></script>
+  <script src="lib/angular-bootstrap/ui-bootstrap-tpls.js"></script>
+  <script src="lib/angular-ui-date/src/date.js"></script>
+  <script src="lib/contour-map/conrec.js"></script>
+  <script src="scripts/app.js"></script>
+  <script src="scripts/filter/util.js"></script>
+  <script src="scripts/services/dataService.js"></script>
+  <script src="scripts/services/pipService.js"></script>
+  <script src="scripts/services/egoVisService.js"></script>
+  <script src="scripts/services/overviewVisService.js"></script>
+  <script src="scripts/controllers/mainviewCtrl.js"></script>
+  <script src="scripts/controllers/uiCtrl.js"></script>
+  <script src="scripts/controllers/rightCtrl.js"></script>
+  <script src="scripts/controllers/tableCtrl.js"></script>
+  <script src="scripts/controllers/dataSelectorCtrl.js"></script>
+  <script src="scripts/controllers/queryFilterCtrl.js"></script>
+  <script src="scripts/controllers/overviewCtrl.js"></script>
+  <script src="scripts/directives/tableAttrDirective.js"></script>
+  <script src="scripts/directives/scrollDirective.js"></script>
+  <script src="scripts/directives/egoDirective.js"></script>
+  <script src="scripts/directives/tableDirective.js"></script>
+
+  <!-- User defined scripts -->
+  <script src="query.js"></script>
+  <script src="wkbridge.js"></script>
+  <script src="d3-event.js"></script>
+  <script src="bridge-service.js"></script>
+
+  <script>
+    jQuery.fn.d3MouseMove = function (posX, posY) {
+      this.each(function (i, e) {
+        var evt = new MouseEvent("mousemove", {clientX: posX, clientY:posY});
+        e.dispatchEvent(evt);
+      });
+    };
+
+
+    var currentHighlightNode = null;
+    var currentZoomLevel = 0;
+    var gBridge;
+    
+    var initPanLocation = {
+      x: null,
+      y: null,
+      scale: null
+    }
+    
+    function gestureZoomIn()
+    {
+      zoomIn("Eitan Grinspun");
+      if (currentZoomLevel == 4)
+      {
+        return "root";
+      }
+    }
+    function gestureZoomOut()
+    {
+      zoomOut("Eitan Grinspun");
+    }
+    function zoomIn(dataKey)
+    {
+      if (currentZoomLevel >= 4) return;
+      console.log("zoom in current level =" + currentZoomLevel);
+      zoomToLevel(dataKey, currentZoomLevel + 1);
+    }
+    function zoomOut(dataKey)
+    {
+      if (currentZoomLevel <= 0) return;
+      console.log("zoom out current level =" + currentZoomLevel);
+      zoomToLevel(dataKey, currentZoomLevel - 1);
+    }
+
+    function zoomToLevel(dataKey, zoomLevel)
+    {
+
+      //Eitan Grinspun
+      var node =  $("circle[data-key='"  + dataKey + "']");
+      var cx = node.attr("cx");
+      var cy = node.attr("cy");
+
+      console.log("cx = " + cx);
+      console.log("cy = " + cy);
+      
+      var scale = 1;
+      switch (zoomLevel) {
+        case 0:
+          scale = 1;
+          currentZoomLevel = zoomLevel;
+          break;
+        case 1:
+          scale = 5;
+          currentZoomLevel = zoomLevel;
+          break;
+        case 2:
+          scale = 10;
+          currentZoomLevel = zoomLevel;
+          break;
+        case 3:
+          scale = 15;
+          currentZoomLevel = zoomLevel;
+          break;
+        case 4:
+          scale = 20;
+          currentZoomLevel = zoomLevel;
+          break;
+
+        default:
+          currentZoomLevel = 0;
+          break;
+      }
+      
+      // var g = $("");
+      var newX = -(scale-1) * cx;
+      var newY = -(scale-1) * cy;
+
+      d3.select(".pointWrapper").transition().attr("transform", "translate(" + newX + "," + newY + ") scale(" + scale + ")");
+      if (currentZoomLevel < 1)
+      {
+        node.attr("fill", "red");
+        node.attr("fill-opacity", "1.0");
+        node.attr("style", "");
+      }
+      else
+      {
+        node.attr("style", "fill: url(#image)");
+        node.attr("fill-opacity", "1.0");
+      }
+
+      // Call Bridge
+      gBridge.callHandler("zoomHandler", { scale_level: scale }, function responseCallback(responseData) {
+            console.log("JS received response:", responseData)
+      });
+
+      sendPanLocation(newX, newY);
+
+    }
+    function drawMDS()
+    {
+      var YearToDraw = '2009';
+      BridgeService.establishBridge([]);
+      BridgeService.drawMDS([YearToDraw]);
+      BridgeService.loadOverviewData(YearToDraw);
+
+    }
+
+    // function enableFishEye()
+    // {
+    //     var fisheye = d3.fisheye.circular()
+    //         .radius(10)
+    //         .distortion(2);
+    //     var svg = d3.select("#densityMapCanvas");
+    //     var nodes = d3.selectAll(".overviewPoint");
+
+    //     svg.on("mousemove", function() {
+    //       fisheye.focus(d3.mouse(this));
+    //       nodes.each(function(d) { d.fisheye = fisheye(d); })
+    //       .attr("cx", function(d) { return d.fisheye.x; })
+    //       .attr("cy", function(d) { return d.fisheye.y; })
+    //       .attr("r", function(d) { return d.fisheye.z * 4.5; });
+
+    //     });
+
+
+    // }
+    function sendFishEyePanLocation(posX, posY)
+    {
+      var evt = new MouseEvent("mousemove", {clientX: posX, clientY:posY});
+        // e.
+
+      $("#densityMapCanvas")[0].dispatchEvent(evt);
+    }
+    function initPanGesture()
+    {
+      var raw = $(".pointWrapper").attr("transform").split("scale")[0].replace("translate(","").replace(")","").split(",");
+      var scale = $(".pointWrapper").attr("transform").split("scale")[1].replace("(","").replace(")","").split(",");
+
+      initPanLocation.x = parseFloat(raw[0]);
+      initPanLocation.y = parseFloat(raw[1]);
+      initPanLocation.scale = parseInt(scale[0]);
+
+    }
+
+    function endPanGesture()
+    {
+
+    }
+
+    function sendPanLocation(newX, newY)
+    {
+      gBridge.callHandler("panHandler", { x: newX, y: newY }, function responseCallback(responseData) {
+        console.log("JS received response:", responseData)
+      });
+
+    }
+
+    function updatePanGestureOffset(offsetX, offsetY)
+    {
+      var newX = offsetX + initPanLocation.x;
+      var newY = offsetY + initPanLocation.y;
+      newX = Math.min(0 ,newX);
+      newY = Math.min(0, newY);
+      var transform = "translate("  + newX + "," + newY + ")";
+      transform += " " + "scale(" + initPanLocation.scale + ")";
+      console.log(transform);
+      $(".pointWrapper").attr("transform", transform);
+      sendPanLocation(newX, newY);
+
+    }
+
+    function startUp(bridge)
+    {
+      if (isNaN(parseInt(getParameterByName("width"))) || isNaN(parseInt(getParameterByName("height"))))
+      {
+        alert("height or width is not specified. default value is used");
+      }
+      else
+      {
+        var svg = d3.select("#densityMapCanvas");
+        var width = parseInt(getParameterByName("width"));
+        var height = parseInt(getParameterByName("height"));
+        svg.attr("width", width);
+        svg.attr("height", height);
+      }
+
+      drawMDS();
+      gBridge = bridge;
+      // var dataKey = "Eitan Grinspun";
+      // var node =  $("circle[data-key='"  + dataKey + "']");
+      // node.attr("fill-opacity", "1.0");
+
+      setTimeout(function(){
+        zoomToLevel("Eitan Grinspun", 4);
+        gBridge.callHandler("svgSizeHandler", { w: d3.select("#densityMapCanvas").attr("width"), h: d3.select("#densityMapCanvas").attr("height") }, function responseCallback(responseData) {
+          console.log("JS received response:", responseData)
+        });
+      }, 1000);
+
+
+    }
+
+    function setImageData(dataKey, imageData){
+
+      $("#imagebox").attr("xlink:href",  "data:image/jpeg;base64," + imageData);
+      var node =  $("circle[data-key='"  + dataKey + "']");
+      node.css({fill: "url(#image)"});
+
+    }
+
+    if(getParameterByName("mode") != "ios")
+    {
+      // alert("Not iOS mode. run without jsbridge.")
+      $(document).ready(function(){
+        startUp(null);
+      });
+    }
+    else
+    {
+      $("#svgWrapper").css({"padding-top": "30%"});
+      $(document).ready(function(){
+        setupWebViewJavascriptBridge(startUp);
+      });
+
+    }
+
+
+
+
+  </script>
+
+</body>
+</html>

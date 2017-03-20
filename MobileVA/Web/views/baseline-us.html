@@ -1,0 +1,33 @@
+<div id="baselineview" ng-controller="baselineCtrl" style="height: 600px" scrollpos="scrollpos">
+    <div id="egoList">
+        <div id="egoNameZone" style="padding-bottom: 4px">
+            <div class="egoNameHead">
+                Ego List
+            </div>
+            <div ng-repeat="ego in egoList" class="egoNameBS"
+                 ng-class="{expansion: ego.expansion, detached: !ego.synScroll}">
+                {{ego.id | replace}}
+            </div>
+        </div>
+        <div id="middleRightWrapper">
+            <div id="egoViewZone">
+                <div scroll-directive id="timelineTop2" style="overflow-x: scroll; overflow-y: hidden;" class="egoView">
+                    <div id="timelineZone" ng-style="{'width': timelineConfig.width}" style="height: 100%">
+                        <svg id="timelineCanvasBS" height="40"></svg>
+                    </div>
+                </div>
+                <div baseline-directive scroll-directive ng-repeat="ego in egoList" class="egoViewBS"
+                    ng-class="{expansion: ego.expansion, synScroll: ego.synScroll, 
+                    asyncScroll: !ego.synScroll, detached: !ego.synScroll}"
+                    draw-ego-baseline="drawEgoBaseline"
+                    ego-data="ego">
+                    <!--<svg width="1500" height="48" style="background:#0000aa">-->
+                    <!--</svg>-->
+                    <!--<div style="width: 200%">-->
+                        <!--{{ego.id}}-->
+                    <!--</div>-->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
