@@ -178,11 +178,12 @@ vishope.factory('overviewVisService', ['$http', 'dataService', 'pipService',
                     //.attr('stroke', 'white')
                     //.attr('stroke-width', 1)
                     .on('mouseover', function (d) {
-                        if (d.cnt != 0) {
-                            tip.show(d);
-                            highLightUserAllYears(d, "hovered");
-                            drawLineForHighLightNodes(d, "hovered");
-                        }
+                        pipService.emitOverviewClicked(d.id);
+                        // if (d.cnt != 0) {
+                        //     tip.show(d);
+                        //     highLightUserAllYears(d, "hovered");
+                        //     drawLineForHighLightNodes(d, "hovered");
+                        // }
                     })
                     .on('mouseout', function (d) {
                         if (d.cnt != 0) {
@@ -192,7 +193,7 @@ vishope.factory('overviewVisService', ['$http', 'dataService', 'pipService',
                         }
                     })
                     .on('mousedown', function (d) {
-                        pipService.emitOverviewClicked(d.id);
+                        // pipService.emitOverviewClicked(d.id);
                     });
                 yearPointWrapper.call(tip);
                 // console.log('hello');

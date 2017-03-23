@@ -7,7 +7,9 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "VAEgoPerson.h"
 
+typedef void (^ImageRecognizeBlock)(BOOL isSuccess, VAEgoPerson* egoPerson, NSInteger imageID);
 @interface VAService : NSObject
 
 + (instancetype)defaultService;
@@ -19,4 +21,7 @@
 - (NSString *)URLWithComponent:(NSString *)component;
 - (NSString *)URLWithComponent:(NSString *)component width:(NSInteger)width height:(NSInteger)height;
 - (NSString *)URLWithComponent:(NSString *)component width:(NSInteger)width height:(NSInteger)height params:(NSDictionary *)params;
+
+- (void)imageRecoginzeForImage:(UIImage *)imageToRecoginze imageID:(NSInteger)imageID completionBlock:(ImageRecognizeBlock)block;
+
 @end

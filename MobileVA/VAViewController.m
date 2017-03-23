@@ -7,6 +7,7 @@
 //
 
 #import "VAViewController.h"
+#import "WToast.h"
 @interface VAViewController ()
 
 
@@ -40,16 +41,30 @@
     _isMinimized = isMinimized;
     if (isMinimized) {
         [self becomeThumbnailView];
+        NSLog(@"T%@", self.view.gestureRecognizers);
     }
     else
     {
         [self becomeMainView];
+        if ([NSStringFromClass([self class]) containsString:@"MDS"]) {
+            [WToast showWithText:@"Switch to MDS View" duration:0.2];
+        }
+        else if ([NSStringFromClass([self class]) containsString:@"Video"]) {
+            [WToast showWithText:@"Switch to Video View" duration:0.2];
+        }
+        else if ([NSStringFromClass([self class]) containsString:@"TimeLine"]) {
+            [WToast showWithText:@"Switch to Storyline View" duration:0.2];
+        }
+        else if ([NSStringFromClass([self class]) containsString:@"Table"]) {
+            [WToast showWithText:@"Switch to Table View" duration:0.2];
+        }
+
     }
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context
 {
-    NSLog(@"changed %@", self);
+
     if ([keyPath isEqualToString:@"activeViewType"]) {
         if ([[change valueForKey:NSKeyValueChangeNewKey] integerValue] == self.type) {
             // I am becoming the Active

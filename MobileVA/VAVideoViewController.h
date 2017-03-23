@@ -22,6 +22,6 @@
 
 - (void)loadEgoPerson:(VAEgoPerson *)egoPerson;
 
-@property (nonatomic, weak) id<VAVideoViewControllerDelegate> dataModel;
+@property (nonatomic, weak) VADataModel<VAVideoViewControllerDelegate>* dataModel;
 
 @end

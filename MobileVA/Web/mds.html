@@ -191,6 +191,10 @@
     function drawMDS()
     {
       var YearToDraw = '2009';
+      if (getParameterByName("year") != null)
+      {
+        YearToDraw = getParameterByName("year");
+      }
       BridgeService.establishBridge([]);
       BridgeService.drawMDS([YearToDraw]);
       BridgeService.loadOverviewData(YearToDraw);
@@ -281,6 +285,13 @@
       // var dataKey = "Eitan Grinspun";
       // var node =  $("circle[data-key='"  + dataKey + "']");
       // node.attr("fill-opacity", "1.0");
+
+      // Bind Click event
+      BridgeService.pipService.onOverviewClicked(angular.element(document.body).scope(), function (msg){
+        console.log("clicked");
+        console.log(msg);
+        gBridge.callHandler("onMDSClick", { people: msg });
+      });
 
       setTimeout(function(){
         zoomToLevel("Eitan Grinspun", 4);

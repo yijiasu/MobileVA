@@ -90,10 +90,10 @@
     });
     return json_bitData;
   }
-  function drawSVG(node)
+  function drawSVG(node, startYear, endYear)
   {
     var div_elem = $("#svgWrapper")[0];
-    BridgeService.drawEgoExpand(div_elem, node);
+    BridgeService.drawEgoExpand(div_elem, node, startYear, endYear);
   }
 
   function highlight(node_key)
@@ -125,7 +125,32 @@
 
   function startUp(bridge)
   {
-   $.ajax("data/hans.json").done(function(json){
+    var loadUrl;
+    var nodeName;
+    var startYear, endYear;
+    if (getParameterByName("egoname") != null)
+    {
+      nodeName = getParameterByName("egoname");
+      loadUrl = "/dataApi/" + getParameterByName("egoname") + ".json";
+    }
+    else
+    {
+      nodeName = "Hans-Peter Seidel";
+      loadUrl = "/data/hans.json";
+    }
+
+    if(getParameterByName("startyear") != null)
+    {
+      startYear = parseInt(getParameterByName("startyear"));
+      endYear = parseInt(getParameterByName("endyear"));
+    }
+    else
+    {
+      startYear = 1994;
+      endYear = 2014;
+    }
+
+   $.ajax(loadUrl).done(function(json){
       if (typeof json == "string")
       {
         json = JSON.parse(json);
@@ -135,9 +160,10 @@
         console.log("type is not string, go throught.");
       }
 
+      json = [json];
       BridgeService.establishBridge(json);
-      var node = BridgeService.getNodeViaEgoName("Hans-Peter Seidel");
-      drawSVG(node);
+      var node = BridgeService.getNodeViaEgoName(nodeName);
+      drawSVG(node, startYear, endYear);
 
 
     });

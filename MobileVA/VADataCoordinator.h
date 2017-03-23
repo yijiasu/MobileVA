@@ -15,7 +15,12 @@
 - (void)loadOverviewDataFile:(NSString *)pathForOVDataFile;
 - (NSDictionary *)egoPersonDataWithName:(NSString *)egoName;
 - (VAEgoPerson *)egoPersonWithName:(NSString *)egoName;
-- (void)retrieveDataViaRequest:(RouteRequest *)request withResponse:(RouteResponse *)response;
 - (NSDictionary *)queryEgoDistanceForYear:(NSInteger)year egoList:(NSArray<NSString *> *)egoList;
+- (NSArray<VAEgoPerson *> *)allEgoPersons;
+
+
+// HTTP Server
+- (void)retrieveEgoPersonDataViaRequest:(RouteRequest *)request withResponse:(RouteResponse *)response;
+- (void)retrieveOverviewDataViaRequest:(RouteRequest *)request withResponse:(RouteResponse *)response;
 
 @end

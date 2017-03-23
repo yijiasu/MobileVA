@@ -10,6 +10,7 @@
 #import "VAVideoViewController.h"
 #import "VADataCoordinator.h"
 #import "VADataModel.h"
+#import <AVFoundation/AVFoundation.h>
 
 
 @interface VAUtil : NSObject
@@ -23,5 +24,7 @@
 - (VAViewController *)getViewController:(VAViewControllerType)vcType;
 - (void)registerViewController:(VAViewController *)viewController withType:(VAViewControllerType)vcType;
 - (UIColor *)colorSchemaForMatrixIndex:(NSInteger)index;
+- (NSString *)thumbnailIconTextForEgoPerson:(VAEgoPerson *)egoPerson;
+- (CGImageRef) imageFromSampleBuffer:(CMSampleBufferRef) sampleBuffer; // Create a CGImageRef from sample buffer data
 
 @end

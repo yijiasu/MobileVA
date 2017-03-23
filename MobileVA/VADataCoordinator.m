@@ -95,7 +95,6 @@
     }
     
     _ovDataDict = totalDict;
-    NSLog(@"%@", _ovDataDict);
 }
 - (VAEgoPerson *)egoPersonWithName:(NSString *)egoName
 {
@@ -106,7 +105,38 @@
     return returnPerson;
 }
 
-- (void)retrieveDataViaRequest:(RouteRequest *)request withResponse:(RouteResponse *)response
+- (NSDictionary *)getOverviewDataForYear:(NSInteger)year
+{
+    __block NSDictionary *selectedData;
+    [_ovRawArray enumerateObjectsUsingBlock:^(NSDictionary * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        if ([obj[@"key"] isEqualToString:[NSString stringWithFormat:@"%ld", year]]) {
+            selectedData = obj;
+        }
+    }];
+    return selectedData;
+}
+
+- (NSDictionary *)queryEgoDistanceForYear:(NSInteger)year egoList:(NSArray<NSString *> *)egoList
+{
+    NSMutableDictionary *queryResult = [NSMutableDictionary new];
+    NSDictionary *selectedDict = _ovDataDict[@(year)];
+    [selectedDict enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, NSString * _Nonnull obj, BOOL * _Nonnull stop) {
+        if ([egoList containsObject:key]) {
+            queryResult[key] = obj;
+        }
+    }];
+    
+    return queryResult;
+    
+}
+
+- (NSArray<VAEgoPerson *> *)allEgoPersons
+{
+    return _egoArray;
+}
+
+
+- (void)retrieveEgoPersonDataViaRequest:(RouteRequest *)request withResponse:(RouteResponse *)response
 {
     
     NSString *key = [request.params[@"wildcards"] firstObject];
@@ -123,17 +153,22 @@
     
 }
 
-- (NSDictionary *)queryEgoDistanceForYear:(NSInteger)year egoList:(NSArray<NSString *> *)egoList
+- (void)retrieveOverviewDataViaRequest:(RouteRequest *)request withResponse:(RouteResponse *)response
 {
-    NSMutableDictionary *queryResult = [NSMutableDictionary new];
-    NSDictionary *selectedDict = _ovDataDict[@(year)];
-    [selectedDict enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, NSString * _Nonnull obj, BOOL * _Nonnull stop) {
-        if ([egoList containsObject:key]) {
-            queryResult[key] = obj;
-        }
-    }];
     
-    return queryResult;
+    NSString *key = [request.params[@"wildcards"] firstObject];
+    NSDictionary *returnDict = [self getOverviewDataForYear:[key integerValue]];
+    if (returnDict) {
+        [response setHeader:@"Content-Type" value:@"application/json"];
+        [response respondWithString:[@[returnDict] toJSONString]];
+    }
+    else
+    {
+        [response setStatusCode:404];
+        [response respondWithString:@"Object Not Found"];
+    }
     
 }
+
+
 @end

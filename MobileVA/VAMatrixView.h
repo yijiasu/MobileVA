@@ -10,7 +10,10 @@
 
 @interface VAMatrixView : UIView
 
+@property NSInteger currentDimension;
+
 - (void)setMatrixDimension:(NSInteger)dim;
+
 - (void)pushValue:(NSInteger)value atPoint:(CGPoint)point;
 
 @end

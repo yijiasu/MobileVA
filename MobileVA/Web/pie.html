@@ -329,9 +329,10 @@ div
     $("#wrapper").width(donut_diameter + text_padding + text_width);
     $("#wrapper").css({
       position: "absolute", 
-      left: cx  - 0.5 * donut_diameter,
+      // left: cx  - 0.5 * donut_diameter,
       height: (3 * donut_diameter + 2 * globalSpacing), 
-      top: cy - (1.5 * donut_diameter)
+      top: 0
+      // top: cy - (1.5 * donut_diameter)
     });
 
     var svg_width = donut_diameter + text_padding + text_width;

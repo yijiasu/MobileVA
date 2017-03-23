@@ -25,6 +25,11 @@
 @property (nonatomic) VAViewControllerType activeViewType;
 @property (nonatomic, strong) NSMutableArray *thumbnailOrder;
 
+
+@property CGSize screenSize;
+@property CGSize thumbnailSize;
+@property CGSize mainViewSize;
+
 @end
 
 @implementation VAHomeViewController
@@ -64,9 +69,9 @@
     
     VADataCoordinator *data = [[VAUtil util] coordinator];
     if (data) {
-        VAEgoPerson *person = [data egoPersonWithName:@"Hans-Peter Seidel"];
-        [_videoVC loadEgoPerson:person];
-        [_dataModel setCurrentEgoPerson:person];
+//        VAEgoPerson *person = [data egoPersonWithName:@"Hans-Peter Seidel"];
+//        [_videoVC loadEgoPerson:person];
+//        [_dataModel setCurrentEgoPerson:person];
     }
 //    
 //    if (!_thumbnailViews) {
@@ -86,28 +91,26 @@
     UIView *midView = [self getViewByType:[_thumbnailOrder[1] integerValue]];
     UIView *rightView = [self getViewByType:[_thumbnailOrder[2] integerValue]];
     
-    CGSize screenSize = [UIScreen mainScreen].bounds.size;
-    CGSize thumbnailSize = CGSizeMake(screenSize.width / 3,
-                                      screenSize.width / 3);
-    CGSize mainViewSize = CGSizeMake(screenSize.width,
-                                     screenSize.height - thumbnailSize.height - 20);
+    _screenSize = [UIScreen mainScreen].bounds.size;
+    _thumbnailSize = CGSizeMake(_screenSize.width / 3, _screenSize.width / 3);
+    _mainViewSize = CGSizeMake(_screenSize.width, _screenSize.height - _thumbnailSize.height - 20);
     
-    [mainView  setFrame: CGRectMake(0, 0, mainViewSize.width, mainViewSize.height)];
+    [mainView  setFrame: CGRectMake(0, 0, _mainViewSize.width, _mainViewSize.height)];
     
     [leftView  setFrame: CGRectMake(0,
-                                    mainViewSize.height + 20,
-                                    thumbnailSize.width,
-                                    thumbnailSize.height)];
+                                    _mainViewSize.height + 20,
+                                    _thumbnailSize.width,
+                                    _thumbnailSize.height)];
     
-    [midView   setFrame: CGRectMake(thumbnailSize.width,
-                                    mainViewSize.height + 20,
-                                    thumbnailSize.width,
-                                    thumbnailSize.height)];
+    [midView   setFrame: CGRectMake(_thumbnailSize.width,
+                                    _mainViewSize.height + 20,
+                                    _thumbnailSize.width,
+                                    _thumbnailSize.height)];
     
-    [rightView setFrame: CGRectMake(thumbnailSize.width * 2,
-                                    mainViewSize.height + 20,
-                                    thumbnailSize.width,
-                                    thumbnailSize.height)];
+    [rightView setFrame: CGRectMake(_thumbnailSize.width * 2,
+                                    _mainViewSize.height + 20,
+                                    _thumbnailSize.width,
+                                    _thumbnailSize.height)];
     
 //    [(VAViewController *)[mainView  associatedObject] setIsMinimized:NO];
 //    [(VAViewController *)[leftView  associatedObject] setIsMinimized:YES];
@@ -166,6 +169,10 @@
         [_mdsVC setAssociatedObject:_mdsView];
         [_mdsView setAssociatedObject:_mdsVC];
         [_mdsVC setIsMinimized:YES];
+        CGSize mainViewSize = CGSizeMake([UIScreen mainScreen].bounds.size.width,
+                                         [UIScreen mainScreen].bounds.size.height - 1/3  * [UIScreen mainScreen].bounds.size.width - 20);
+
+        [_mdsVC setValue:[NSValue valueWithCGSize:mainViewSize] forKey:@"MDSViewSize"];
         NSLog(@"embed_LEFT");
     }
     else if ([[segue identifier] isEqualToString:@"embed_mid"]) {
@@ -216,7 +223,15 @@
     _dataModel.activeViewType = activeViewType;
 //    [_dataModel setValue:@(activeViewType) forKey:@"activeViewType"];
     [self relocateViews];
-    
+    [self refreshGestureRecogizer];
+}
+
+- (void)refreshGestureRecogizer
+{
+    [[[[self getViewByType:_activeViewType] gestureRecognizers] firstObject] setEnabled:NO];
+    for (NSNumber *type in _thumbnailOrder) {
+        [[[[self getViewByType:[type integerValue]] gestureRecognizers] firstObject] setEnabled:YES];
+    }
 }
 
 

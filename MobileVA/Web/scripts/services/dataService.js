@@ -201,7 +201,7 @@ vishope.factory('dataService', ['$http', function($http) {
     }
 
     dataService.getStaticOverviewData = function(date) {
-        var getOverviewDataURL = serverURL + 'data/ov_' + date[0] + '.json';
+        var getOverviewDataURL = serverURL + 'ovApi/' + date[0] + '.json';
         return $http.get(getOverviewDataURL);
     }
 

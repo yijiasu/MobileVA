@@ -131,6 +131,7 @@ vishope.factory('pipService', ['$rootScope', function($rootScope) {
     };
 
     pipService.onOverviewClicked = function(scope, callback) {
+        console.log("pipService.onOverviewClicked");
         scope.$on(OVERVIEW_CLICKED, function(event, msg) {
             callback(msg);
         });

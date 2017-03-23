@@ -10,4 +10,6 @@
 
 @interface VAMDSViewController : VAViewController
 
+@property CGSize MDSViewSize;
+
 @end

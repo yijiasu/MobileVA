@@ -27,14 +27,22 @@
 		742D32A21E7C12FB0036B9D9 /* NSArray+JSON.m in Sources */ = {isa = PBXBuildFile; fileRef = 742D32A11E7C12FB0036B9D9 /* NSArray+JSON.m */; };
 		742D32A51E7C13930036B9D9 /* NSDictionary+JSON.m in Sources */ = {isa = PBXBuildFile; fileRef = 742D32A41E7C13930036B9D9 /* NSDictionary+JSON.m */; };
 		742D32A81E7C45A90036B9D9 /* Web in Resources */ = {isa = PBXBuildFile; fileRef = 742D32A71E7C45A90036B9D9 /* Web */; };
+		743469F61E80F8EE00BFAD9A /* VAEgoNameThumbnailCollectionViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 743469F51E80F8EE00BFAD9A /* VAEgoNameThumbnailCollectionViewCell.m */; };
+		743469F91E81819A00BFAD9A /* FDMagnifyView.m in Sources */ = {isa = PBXBuildFile; fileRef = 743469F81E81819A00BFAD9A /* FDMagnifyView.m */; };
 		743CFD8F1E7EBF7900A4CEAE /* VAMatrixView.m in Sources */ = {isa = PBXBuildFile; fileRef = 743CFD8E1E7EBF7900A4CEAE /* VAMatrixView.m */; };
 		743CFD921E7EC77700A4CEAE /* VAMatrixCellView.m in Sources */ = {isa = PBXBuildFile; fileRef = 743CFD911E7EC77700A4CEAE /* VAMatrixCellView.m */; };
 		743CFD951E7EE24D00A4CEAE /* UIColor+Hex.m in Sources */ = {isa = PBXBuildFile; fileRef = 743CFD941E7EE24D00A4CEAE /* UIColor+Hex.m */; };
+		74829F241E8185C7007FFE77 /* UIView+DragDrop.m in Sources */ = {isa = PBXBuildFile; fileRef = 74829F211E8185C7007FFE77 /* UIView+DragDrop.m */; };
+		74829F251E8185C7007FFE77 /* UIView+draggable.m in Sources */ = {isa = PBXBuildFile; fileRef = 74829F231E8185C7007FFE77 /* UIView+draggable.m */; };
+		74829F281E818AFA007FFE77 /* UIWebView+ScreenShot.m in Sources */ = {isa = PBXBuildFile; fileRef = 74829F271E818AFA007FFE77 /* UIWebView+ScreenShot.m */; };
+		7497FD701E82E3A800C79402 /* VAFaceRecognizer.m in Sources */ = {isa = PBXBuildFile; fileRef = 7497FD6F1E82E3A800C79402 /* VAFaceRecognizer.m */; };
 		74CDA8491E7D512F003B2579 /* VAHomeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 74CDA8481E7D512F003B2579 /* VAHomeViewController.m */; };
 		74CDA84D1E7D5818003B2579 /* NSString+URLEncode.m in Sources */ = {isa = PBXBuildFile; fileRef = 74CDA84C1E7D5818003B2579 /* NSString+URLEncode.m */; };
 		74CDA8501E7D74DC003B2579 /* VAMDSViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 74CDA84F1E7D74DC003B2579 /* VAMDSViewController.m */; };
 		74CDA8531E7D74EB003B2579 /* VATableListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 74CDA8521E7D74EB003B2579 /* VATableListViewController.m */; };
 		74CDA8561E7D74F9003B2579 /* VATimeLineViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 74CDA8551E7D74F9003B2579 /* VATimeLineViewController.m */; };
+		74D379AE1E7FFC05001FDA71 /* WToast.m in Sources */ = {isa = PBXBuildFile; fileRef = 74D379AD1E7FFC05001FDA71 /* WToast.m */; };
+		74D379B11E802280001FDA71 /* VAEgoListTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 74D379B01E802280001FDA71 /* VAEgoListTableViewCell.m */; };
 		74DE5D531E7A659C0060EA57 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 74DE5D521E7A659C0060EA57 /* main.m */; };
 		74DE5D561E7A659C0060EA57 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 74DE5D551E7A659C0060EA57 /* AppDelegate.m */; };
 		74DE5D591E7A659C0060EA57 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 74DE5D581E7A659C0060EA57 /* ViewController.m */; };
@@ -82,12 +90,24 @@
 		742D32A31E7C13930036B9D9 /* NSDictionary+JSON.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSDictionary+JSON.h"; sourceTree = "<group>"; };
 		742D32A41E7C13930036B9D9 /* NSDictionary+JSON.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDictionary+JSON.m"; sourceTree = "<group>"; };
 		742D32A71E7C45A90036B9D9 /* Web */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Web; sourceTree = "<group>"; };
+		743469F41E80F8EE00BFAD9A /* VAEgoNameThumbnailCollectionViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VAEgoNameThumbnailCollectionViewCell.h; sourceTree = "<group>"; };
+		743469F51E80F8EE00BFAD9A /* VAEgoNameThumbnailCollectionViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VAEgoNameThumbnailCollectionViewCell.m; sourceTree = "<group>"; };
+		743469F71E81819A00BFAD9A /* FDMagnifyView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FDMagnifyView.h; sourceTree = "<group>"; };
+		743469F81E81819A00BFAD9A /* FDMagnifyView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FDMagnifyView.m; sourceTree = "<group>"; };
 		743CFD8D1E7EBF7900A4CEAE /* VAMatrixView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VAMatrixView.h; sourceTree = "<group>"; };
 		743CFD8E1E7EBF7900A4CEAE /* VAMatrixView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VAMatrixView.m; sourceTree = "<group>"; };
 		743CFD901E7EC77700A4CEAE /* VAMatrixCellView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VAMatrixCellView.h; sourceTree = "<group>"; };
 		743CFD911E7EC77700A4CEAE /* VAMatrixCellView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VAMatrixCellView.m; sourceTree = "<group>"; };
 		743CFD931E7EE24D00A4CEAE /* UIColor+Hex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIColor+Hex.h"; sourceTree = "<group>"; };
 		743CFD941E7EE24D00A4CEAE /* UIColor+Hex.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIColor+Hex.m"; sourceTree = "<group>"; };
+		74829F201E8185C7007FFE77 /* UIView+DragDrop.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIView+DragDrop.h"; sourceTree = "<group>"; };
+		74829F211E8185C7007FFE77 /* UIView+DragDrop.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIView+DragDrop.m"; sourceTree = "<group>"; };
+		74829F221E8185C7007FFE77 /* UIView+draggable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIView+draggable.h"; sourceTree = "<group>"; };
+		74829F231E8185C7007FFE77 /* UIView+draggable.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIView+draggable.m"; sourceTree = "<group>"; };
+		74829F261E818AFA007FFE77 /* UIWebView+ScreenShot.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIWebView+ScreenShot.h"; sourceTree = "<group>"; };
+		74829F271E818AFA007FFE77 /* UIWebView+ScreenShot.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIWebView+ScreenShot.m"; sourceTree = "<group>"; };
+		7497FD6E1E82E3A800C79402 /* VAFaceRecognizer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VAFaceRecognizer.h; sourceTree = "<group>"; };
+		7497FD6F1E82E3A800C79402 /* VAFaceRecognizer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VAFaceRecognizer.m; sourceTree = "<group>"; };
 		74CDA8471E7D512F003B2579 /* VAHomeViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VAHomeViewController.h; sourceTree = "<group>"; };
 		74CDA8481E7D512F003B2579 /* VAHomeViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VAHomeViewController.m; sourceTree = "<group>"; };
 		74CDA84B1E7D5818003B2579 /* NSString+URLEncode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+URLEncode.h"; sourceTree = "<group>"; };
@@ -98,6 +118,10 @@
 		74CDA8521E7D74EB003B2579 /* VATableListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VATableListViewController.m; sourceTree = "<group>"; };
 		74CDA8541E7D74F9003B2579 /* VATimeLineViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VATimeLineViewController.h; sourceTree = "<group>"; };
 		74CDA8551E7D74F9003B2579 /* VATimeLineViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VATimeLineViewController.m; sourceTree = "<group>"; };
+		74D379AC1E7FFC05001FDA71 /* WToast.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WToast.h; sourceTree = "<group>"; };
+		74D379AD1E7FFC05001FDA71 /* WToast.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WToast.m; sourceTree = "<group>"; };
+		74D379AF1E802280001FDA71 /* VAEgoListTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VAEgoListTableViewCell.h; sourceTree = "<group>"; };
+		74D379B01E802280001FDA71 /* VAEgoListTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VAEgoListTableViewCell.m; sourceTree = "<group>"; };
 		74DE5D4E1E7A659C0060EA57 /* MobileVA.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MobileVA.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		74DE5D521E7A659C0060EA57 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		74DE5D541E7A659C0060EA57 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -156,12 +180,16 @@
 		7418BF711E7AA98D00B9C2E3 /* View Controller */ = {
 			isa = PBXGroup;
 			children = (
+				743469F71E81819A00BFAD9A /* FDMagnifyView.h */,
+				743469F81E81819A00BFAD9A /* FDMagnifyView.m */,
 				74CDA8471E7D512F003B2579 /* VAHomeViewController.h */,
 				74CDA8481E7D512F003B2579 /* VAHomeViewController.m */,
 				743CFD8D1E7EBF7900A4CEAE /* VAMatrixView.h */,
 				743CFD8E1E7EBF7900A4CEAE /* VAMatrixView.m */,
 				743CFD901E7EC77700A4CEAE /* VAMatrixCellView.h */,
 				743CFD911E7EC77700A4CEAE /* VAMatrixCellView.m */,
+				7497FD6E1E82E3A800C79402 /* VAFaceRecognizer.h */,
+				7497FD6F1E82E3A800C79402 /* VAFaceRecognizer.m */,
 				74CDA84A1E7D5135003B2579 /* VA VC */,
 			);
 			name = "View Controller";
@@ -177,6 +205,14 @@
 		7418BF911E7AB67700B9C2E3 /* Library */ = {
 			isa = PBXGroup;
 			children = (
+				74829F261E818AFA007FFE77 /* UIWebView+ScreenShot.h */,
+				74829F271E818AFA007FFE77 /* UIWebView+ScreenShot.m */,
+				74829F201E8185C7007FFE77 /* UIView+DragDrop.h */,
+				74829F211E8185C7007FFE77 /* UIView+DragDrop.m */,
+				74829F221E8185C7007FFE77 /* UIView+draggable.h */,
+				74829F231E8185C7007FFE77 /* UIView+draggable.m */,
+				74D379AC1E7FFC05001FDA71 /* WToast.h */,
+				74D379AD1E7FFC05001FDA71 /* WToast.m */,
 				743CFD931E7EE24D00A4CEAE /* UIColor+Hex.h */,
 				743CFD941E7EE24D00A4CEAE /* UIColor+Hex.m */,
 				742D32A61E7C139A0036B9D9 /* JSON */,
@@ -229,6 +265,10 @@
 				74CDA8521E7D74EB003B2579 /* VATableListViewController.m */,
 				74CDA8541E7D74F9003B2579 /* VATimeLineViewController.h */,
 				74CDA8551E7D74F9003B2579 /* VATimeLineViewController.m */,
+				74D379AF1E802280001FDA71 /* VAEgoListTableViewCell.h */,
+				74D379B01E802280001FDA71 /* VAEgoListTableViewCell.m */,
+				743469F41E80F8EE00BFAD9A /* VAEgoNameThumbnailCollectionViewCell.h */,
+				743469F51E80F8EE00BFAD9A /* VAEgoNameThumbnailCollectionViewCell.m */,
 			);
 			name = "VA VC";
 			sourceTree = "<group>";
@@ -421,8 +461,10 @@
 				7418BF8F1E7AB67400B9C2E3 /* UIAlertController+Window.m in Sources */,
 				742D32A21E7C12FB0036B9D9 /* NSArray+JSON.m in Sources */,
 				7418BF5F1E7A80F500B9C2E3 /* VAView.m in Sources */,
+				74D379B11E802280001FDA71 /* VAEgoListTableViewCell.m in Sources */,
 				7418BF6F1E7A914900B9C2E3 /* VAUtil.m in Sources */,
 				742D32A51E7C13930036B9D9 /* NSDictionary+JSON.m in Sources */,
+				74829F281E818AFA007FFE77 /* UIWebView+ScreenShot.m in Sources */,
 				7418BF691E7A908400B9C2E3 /* VAEgoPerson.m in Sources */,
 				74CDA8491E7D512F003B2579 /* VAHomeViewController.m in Sources */,
 				7418BF661E7A855A00B9C2E3 /* VADataModel.m in Sources */,
@@ -432,16 +474,22 @@
 				7418BF841E7AB5F500B9C2E3 /* FDSmoother.m in Sources */,
 				7418BF7F1E7AADDC00B9C2E3 /* ExtendNSLog.m in Sources */,
 				743CFD8F1E7EBF7900A4CEAE /* VAMatrixView.m in Sources */,
+				7497FD701E82E3A800C79402 /* VAFaceRecognizer.m in Sources */,
 				74CDA84D1E7D5818003B2579 /* NSString+URLEncode.m in Sources */,
+				74829F241E8185C7007FFE77 /* UIView+DragDrop.m in Sources */,
 				74CDA8531E7D74EB003B2579 /* VATableListViewController.m in Sources */,
 				7418BF741E7AA9B700B9C2E3 /* VAViewController.m in Sources */,
 				742D329F1E7C12C50036B9D9 /* NSString+JSON.m in Sources */,
 				74CDA8501E7D74DC003B2579 /* VAMDSViewController.m in Sources */,
+				74829F251E8185C7007FFE77 /* UIView+draggable.m in Sources */,
 				7418BF6C1E7A913F00B9C2E3 /* VAService.m in Sources */,
 				7418BF8D1E7AB67400B9C2E3 /* UIImage+Trim.m in Sources */,
 				74DE5D531E7A659C0060EA57 /* main.m in Sources */,
+				743469F91E81819A00BFAD9A /* FDMagnifyView.m in Sources */,
 				743CFD951E7EE24D00A4CEAE /* UIColor+Hex.m in Sources */,
+				743469F61E80F8EE00BFAD9A /* VAEgoNameThumbnailCollectionViewCell.m in Sources */,
 				7418BF771E7AA9D000B9C2E3 /* VAVideoViewController.m in Sources */,
+				74D379AE1E7FFC05001FDA71 /* WToast.m in Sources */,
 				743CFD921E7EC77700A4CEAE /* VAMatrixCellView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

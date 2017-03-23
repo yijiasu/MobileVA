@@ -36,5 +36,7 @@
 #import "VAVideoViewController.h"
 
 
+#define MAX_SELECTED_EGO_LIMIT 5
+#define MATRIX_BORDER_WIDTH 15
 
 #endif /* PrefixHeader_pch */

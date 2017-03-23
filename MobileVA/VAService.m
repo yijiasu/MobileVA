@@ -10,10 +10,13 @@
 //#import <CocoaHTTPServer/HTTPServer.h>
 #import <RoutingHTTPServer/RoutingHTTPServer.h>
 #import "NSString+URLEncode.h"
+#import <AFNetworking/AFNetworking.h>
+
 @interface VAService ()
 
 @property BOOL isHTTPServerRunning;
 @property (nonatomic, strong) RoutingHTTPServer *httpServer;
+@property (strong, nonatomic)  AFHTTPSessionManager *manager;
 
 @end
 
@@ -27,9 +30,18 @@
     if (self) {
         _isHTTPServerRunning = NO;
         [VAUtil util].service = self;
+        [self setupNetwork];
     }
     return self;
 }
+
+- (void)setupNetwork
+{
+    if (!_manager) {
+        _manager = [AFHTTPSessionManager manager];
+    }
+}
+
 
 + (instancetype)defaultService
 {
@@ -54,7 +66,13 @@
         [_httpServer handleMethod:@"GET"
                          withPath:@"/dataApi/*.json"
                            target:[VAUtil util].coordinator
-                         selector:@selector(retrieveDataViaRequest:withResponse:)];
+                         selector:@selector(retrieveEgoPersonDataViaRequest:withResponse:)];
+        
+        [_httpServer handleMethod:@"GET"
+                         withPath:@"/ovApi/*.json"
+                           target:[VAUtil util].coordinator
+                         selector:@selector(retrieveOverviewDataViaRequest:withResponse:)];
+
     }
 }
 
@@ -111,5 +129,77 @@
     
 }
 
+- (void)imageRecoginzeForImage:(UIImage *)imageToRecoginze imageID:(NSInteger)imageID completionBlock:(ImageRecognizeBlock)block
+{
+    NSData *imageData = UIImageJPEGRepresentation(imageToRecoginze, 0.7);
+
+    
+    [_manager           POST:@"http://facenet.yijiasu.me/upload"
+                  parameters:nil
+   constructingBodyWithBlock:^(id<AFMultipartFormData>  _Nonnull formData) {
+       [formData appendPartWithFileData:imageData name:@"file" fileName:@"upload.jpg" mimeType:@"image/jpeg"];
+   }
+                    progress:nil
+                     success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+                         NSLog(@"%@", responseObject);
+                         if ([responseObject isKindOfClass:[NSDictionary class]]) {
+                             if ([responseObject[@"status"] isEqualToString:@"ok"]) {
+                                 NSString *imageToken = responseObject[@"token"];
+
+                                 [_manager POST:@"http://facenet.yijiasu.me/check_result"
+                                     parameters:@{@"token" : imageToken}
+                                        success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+                                            if ([responseObject isKindOfClass:[NSDictionary class]]) {
+                                                NSString *result = responseObject[@"message"];
+                                                if ([responseObject[@"status"] isEqualToString:@"ok"]) {
+                                                    
+                                                    VAEgoPerson *egoPerson = [[VAUtil util].coordinator egoPersonWithName:result];
+                                                    if (egoPerson) {
+                                                        block(YES, egoPerson, imageID);
+                                                    }
+                                                    else
+                                                    {
+                                                        block(NO, nil, imageID);
+                                                    }
+                                                    
+                                                }
+                                                else
+                                                {
+                                                    NSLog(@"Server Error: %@", result);
+                                                    block(NO, nil, imageID);
+                                                }
+                                            }
+                                            else
+                                            {
+                                                NSLog(@"server response error -2");
+                                                block(NO, nil, imageID);
+                                            }
+                                            
+                                        }
+                                        failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
+                                            NSLog(@"Error in querying: %@", [error localizedDescription]);
+                                            block(NO, nil, imageID);
+                                        }];
+
+                             }
+                             else
+                             {
+                                 NSLog(@"server response error -1");
+                                 block(NO, nil, imageID);
+                                 
+                             }
+                         }
+                         else
+                         {
+                             NSLog(@"server response error -2");
+                             block(NO, nil, imageID);
+                         }
+                     }
+                     failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
+                         NSLog(@"%@", [NSString stringWithFormat:@"Error in uploading: %@", [error localizedDescription]]);
+                         block(NO, nil, imageID);
+                     }];
+
+}
 
 @end

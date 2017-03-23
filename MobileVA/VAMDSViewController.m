@@ -10,13 +10,18 @@
 #import <WebViewJavascriptBridge/WebViewJavascriptBridge.h>
 #import <PureLayout/PureLayout.h>
 #import "VAMatrixView.h"
+#import "VADataModel.h"
+#import "WToast.h"
 
-@interface VAMDSViewController ()
+@interface VAMDSViewController () <UIGestureRecognizerDelegate>
 
 @property (weak, nonatomic) IBOutlet UIWebView *webView;
+@property (weak, nonatomic) IBOutlet UILabel *selectedPersonLabel;
 @property (nonatomic, strong) WebViewJavascriptBridge* bridge;                  // JS Bridge For WebView
 @property (nonatomic, strong) VAMatrixView *matrixView;
+@property (nonatomic, strong) NSMutableArray<VAEgoPerson *> *selectedEgo;
 
+@property NSInteger currentYear;
 @end
 
 @implementation VAMDSViewController
@@ -26,19 +31,23 @@
     self.type = VAViewControllerTypeMDS;
     [self configureWebView];
     
+    _selectedEgo = [NSMutableArray new];
     _matrixView = [[VAMatrixView alloc] initWithFrame:CGRectMake(0,
                                                                  0,
                                                                  [UIScreen mainScreen].bounds.size.width / 3,
                                                                  [UIScreen mainScreen].bounds.size.width / 3)];
     
-    [_matrixView setMatrixDimension:3];
+//    [_matrixView setMatrixDimension:3];
     [_matrixView setHidden:NO];
+    
     [self.view addSubview:_matrixView];
     
     
     if (self.dataModel) {
         [self.dataModel addObserver:self forKeyPath:@"currentYear" options:(NSKeyValueObservingOptionNew|NSKeyValueObservingOptionOld) context:NULL];
+        [self.dataModel addObserver:self forKeyPath:@"selectedEgoPerson" options:(NSKeyValueObservingOptionNew|NSKeyValueObservingOptionOld) context:NULL];
     }
+    
     
 }
 
@@ -49,13 +58,27 @@
 }
 - (void)configureWebView
 {
-    NSString *urlString = [[VAService defaultService] URLWithComponent:@"mds.html"
-                                                                 width:_webView.frame.size.width
-                                                                height:_webView.frame.size.height];
+
     [self registerJSHandler];
 
-    [self.webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:urlString]]];
     self.webView.userInteractionEnabled = NO;
+    self.webView.scrollView.scrollEnabled = NO;
+    
+    // Add Gesture Recoginzer
+    
+    UIPinchGestureRecognizer *pgr = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(handlePinchGesture:)];
+    UIPanGestureRecognizer *pagr = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePanGesture:)];
+    
+    [pgr requireGestureRecognizerToFail:pagr];
+    pgr.delegate = self;
+    pagr.delegate = self;
+    pagr.maximumNumberOfTouches = 1;
+    pagr.minimumNumberOfTouches = 1;
+    //                        targetWebview.userInteractionEnabled = NO;
+    if ([self.webView.gestureRecognizers count] < 2) {
+        [self.webView addGestureRecognizer:pgr];
+        [self.webView addGestureRecognizer:pagr];
+    }
     
 
 }
@@ -67,53 +90,21 @@
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context
 {
+    [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+    
     if ([keyPath isEqualToString:@"currentYear"]) {
         NSLog(@"%@", change);
         NSInteger newYear = [change[NSKeyValueChangeNewKey] integerValue];
-        VADataCoordinator *coordinator = [VAUtil util].coordinator;
-        
-        NSArray *egoList = @[@"Hans-Peter Seidel", @"Kwan-Liu Ma", @"Huamin Qu"];
-        NSDictionary *result = [coordinator queryEgoDistanceForYear:newYear egoList:egoList];
-        
-        NSMutableArray *array = [NSMutableArray new];
-        for (int i = 0; i < 3; i++) {
-            NSString *yValue = result[egoList[i]];
-            if (!yValue) {
-                [array addObject:@[@(-1), @(-1), @(-1)]];
-            }
-            else
-            {
-                NSMutableArray *rowArray = [NSMutableArray new];
-                for (int j = 0; j < 3; j++) {
-                    NSString *xValue = result[egoList[j]];
-                    if (!xValue) {
-                        [rowArray addObject:@(-1)];
-                    }
-                    else
-                    {
-                        NSArray *p1Array = [yValue componentsSeparatedByString:@","];
-                        NSArray *p2Array = [xValue componentsSeparatedByString:@","];
-                        CGPoint p1 = CGPointMake([p1Array[0] floatValue], [p1Array[1] floatValue]);
-                        CGPoint p2 = CGPointMake([p2Array[0] floatValue], [p2Array[1] floatValue]);
-                        
-                        CGFloat distance = sqrt(pow(p1.x - p2.x, 2) + pow(p1.y - p2.y, 2));
-                        
-                        [rowArray addObject:@(distance * 40)];
-                    }
-                }
-                [array addObject:rowArray];
-            }
-
-        }
-        NSLog(@"Query Result = %@", result);
-        NSLog(@"Calc Result = %@", array);
-        
-        [array enumerateObjectsUsingBlock:^(NSArray * _Nonnull subArray, NSUInteger idY, BOOL * _Nonnull stop) {
-            [subArray enumerateObjectsUsingBlock:^(NSNumber  * _Nonnull value, NSUInteger idX, BOOL * _Nonnull stop) {
-                [_matrixView pushValue:[value integerValue] atPoint:CGPointMake(idX, idY)];
-            }];
-        }];
-
+        _currentYear = newYear;
+//        [self redrawMatrixViewForYear:_currentYear];
+        [self redrawMDSViewForYear:_currentYear];
+    }
+    else if ([keyPath isEqualToString:@"selectedEgoPerson"]) {
+        _selectedEgo = change[NSKeyValueChangeNewKey];
+//        if (_currentYear) {
+//            [self redrawMatrixViewForYear:_currentYear];
+//        }
+        [self refreshEgoDisplay];
     }
 }
 
@@ -123,8 +114,16 @@
 - (void)registerJSHandler
 {
     // Configure Bridege
-    _bridge = [WebViewJavascriptBridge bridgeForWebView:_webView];
-//    
+    if (!_bridge) {
+        _bridge = [WebViewJavascriptBridge bridgeForWebView:_webView];
+        
+        [_bridge registerHandler:@"onMDSClick" handler:^(NSDictionary *data, WVJBResponseCallback responseCallback) {
+            NSString *selectedPeople = data[@"people"];
+            [WToast showWithText:selectedPeople];
+            [self addPerson:selectedPeople];
+        }];
+    }
+//
 //    [_bridge registerHandler:@"onJSONLoadFinish" handler:^(id data, WVJBResponseCallback responseCallback) {
 //        NSLog(@"JSON Data Load Finish");
 //    }];
@@ -138,6 +137,94 @@
     
 }
 
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
+{
+    return YES;
+}
+
+- (void)handlePanGesture:(UIPanGestureRecognizer *)panGestureRecognizer
+{
+    CGPoint offset = [panGestureRecognizer translationInView:_webView];
+    NSLog(@"Pan Offset! x=%f y=%f", offset.x, offset.y);
+
+    
+    if (panGestureRecognizer.state == 1) {
+        // Start Pan
+        [_webView stringByEvaluatingJavaScriptFromString:@"initPanGesture()"];
+    }
+    else if (panGestureRecognizer.state == 2) {
+        NSString *stringToExecute = [NSString stringWithFormat:@"updatePanGestureOffset(%f, %f)", offset.x, offset.y];
+        [_webView stringByEvaluatingJavaScriptFromString:stringToExecute];
+    }
+    else if (panGestureRecognizer.state == 3)
+    {
+        [_webView stringByEvaluatingJavaScriptFromString:@"endPanGesture()"];
+    }
+    
+}
+
+
+
+- (void)handlePinchGesture:(UIPinchGestureRecognizer *)pinchGestureRecoginzer
+{
+
+    
+    UIWebView *targetWebview = self.webView;
+
+    // In Web Stage
+    if (pinchGestureRecoginzer.state == 1) {
+        if (pinchGestureRecoginzer.scale < 1) {
+            [targetWebview stringByEvaluatingJavaScriptFromString:@"gestureZoomOut()"];
+        }
+        else if (pinchGestureRecoginzer.scale > 1)
+        {
+            NSString *rtnValue = [targetWebview stringByEvaluatingJavaScriptFromString:@"gestureZoomIn()"];
+            if ([rtnValue isEqualToString:@"root"]) {
+                NSLog(@"root stage");
+            }
+        }
+    }
+    
+}
+
+- (void)addPerson:(NSString *)personID
+{
+    VAEgoPerson *egoPerson = [[[VAUtil util] coordinator] egoPersonWithName:personID];
+    if (egoPerson) {
+        [_selectedEgo addObject:egoPerson];
+        if ([_selectedEgo count] > MAX_SELECTED_EGO_LIMIT) {
+            [_selectedEgo removeObjectAtIndex:0];
+        }
+    }
+    
+    self.dataModel.selectedEgoPerson = _selectedEgo;
+    [_matrixView setMatrixDimension:_selectedEgo.count];
+    
+    [self refreshEgoDisplay];
+    
+}
+
+- (void)refreshEgoDisplay
+{
+    if ([_selectedEgo count] == 0) {
+        self.selectedPersonLabel.text = @"No EgoPerson is selected.";
+    }
+    else
+    {
+        self.selectedPersonLabel.text = [NSString stringWithFormat:@"Selected Person: %@", [[self.dataModel egoPersonNameArray] componentsJoinedByString:@", "]];
+    }
+}
+
+
+- (void)redrawMDSViewForYear:(NSInteger)newYear
+{
+    NSString *urlString = [[VAService defaultService] URLWithComponent:@"mds.html"
+                                                                 width:_MDSViewSize.width
+                                                                height:_MDSViewSize.height
+                                                                params:@{@"year" : [NSString stringWithFormat:@"%ld", _currentYear]}];
+    [self.webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:urlString]]];
+
+}
 
 #pragma mark VAViewController View Size Control
 
@@ -159,6 +246,7 @@
     _webView.userInteractionEnabled = YES;
     [_matrixView setHidden:YES];
 }
+
 
 
 

@@ -12,13 +12,17 @@
 
 + (instancetype)sharedDataModel;
 
-- (void)capturePersonImage:(UIImage *)image;
 
-
-
-@property (nonatomic, strong) VAEgoPerson *currentEgoPerson;
+@property (nonatomic, strong) NSArray<VAEgoPerson *> *selectedEgoPerson;
+@property (readonly) VAEgoPerson *currentEgoPerson;
 @property NSInteger currentDonutIndex;
 @property NSInteger currentYear;
 @property VAViewControllerType activeViewType;
+@property (nonatomic, strong) UIImage *croppedVideoImage;
+
+- (void)inputEgoPersonFromVideo:(VAEgoPerson *)egoPerson;
+- (void)removeEgoPersonFromVideo;
+- (void)capturePersonImage:(UIImage *)image;
+- (NSArray<NSString *> *)egoPersonNameArray;
 
 @end

@@ -7,8 +7,14 @@
 //
 
 #import "VATableListViewController.h"
+#import "VAEgoNameThumbnailCollectionViewCell.h"
+#import "VAEgoListTableViewCell.h"
 
-@interface VATableListViewController ()
+@interface VATableListViewController () <UITableViewDelegate, UITableViewDataSource, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout>
+@property (weak, nonatomic) IBOutlet UITableView *tableView;
+@property (nonatomic, strong) NSArray *allEgoList;
+@property (nonatomic, strong) NSMutableArray<VAEgoPerson *> *selectedEgo;
+@property (weak, nonatomic) IBOutlet UICollectionView *collectionView;
 
 @end
 
@@ -18,6 +24,25 @@
     [super viewDidLoad];
     self.type = VAViewControllerTypeTable;
     
+    self.tableView.delegate = self;
+    self.tableView.dataSource = self;
+    
+    _selectedEgo = [NSMutableArray new];
+    _allEgoList = [[[VAUtil util] coordinator] allEgoPersons];
+    [_tableView setHidden:YES];
+    
+    _collectionView.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width / 3, [UIScreen mainScreen].bounds.size.width / 3);
+    _collectionView.delegate = self;
+    _collectionView.dataSource = self;
+    [_collectionView setHidden:NO];
+    
+    [self.dataModel addObserver:self forKeyPath:@"selectedEgoPerson" options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:NULL];
+    
+}
+
+- (void)dealloc
+{
+    [self.dataModel removeObserver:self forKeyPath:@"selectedEgoPerson"];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -31,12 +56,131 @@
 - (void)becomeThumbnailView
 {
     NSLog(@"%@ becomeThumbnailView", self);
+    [self.tableView setHidden:YES];
+    [self.collectionView setHidden:NO];
+    
 }
 
 - (void)becomeMainView
 {
     NSLog(@"%@ becomeMainView", self);
+    [self.tableView setHidden:NO];
+    [self.collectionView setHidden:YES];
     
+    _selectedEgo = [[[VAUtil util] model].selectedEgoPerson mutableCopy];
+    [_tableView reloadData];
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    VAEgoListTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"EgoListCell" forIndexPath:indexPath];
+    VAEgoPerson *egoPerson = _allEgoList[indexPath.row];
+    if (cell) {
+        [cell configureCellWithEgoPerson:egoPerson];
+        if ([self.dataModel.selectedEgoPerson containsObject:egoPerson]) {
+            [cell setAccessoryType:UITableViewCellAccessoryCheckmark];
+        }
+        else
+        {
+            [cell setAccessoryType:UITableViewCellAccessoryNone];
+        }
+    }
+    return cell;
+}
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    return 1;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return [_allEgoList count];
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+//    VAEgoListTableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
+//    [cell setAccessoryType:UITableViewCellAccessoryCheckmark];
+//
+    
+    VAEgoPerson *person = _allEgoList[indexPath.row];
+    [self togglePerson: person];
+    [self refreshSelectedPerson];
+}
+
+- (void)refreshSelectedPerson
+{
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.01 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [self.tableView reloadData];
+        [self.collectionView reloadData];
+    });
+}
+
+- (void)togglePerson:(VAEgoPerson *)egoPerson
+{
+
+    if (egoPerson) {
+        if ([_selectedEgo containsObject:egoPerson]) {
+            if ([_selectedEgo count] > 1) {
+                [_selectedEgo removeObject:egoPerson];
+            }
+        }
+        else
+        {
+            [_selectedEgo addObject:egoPerson];
+            if ([_selectedEgo count] > MAX_SELECTED_EGO_LIMIT) {
+                [_selectedEgo removeObjectAtIndex:0];
+            }
+        }
+    }
+    
+    self.dataModel.selectedEgoPerson = _selectedEgo;
+
+}
+
+#pragma mark Collection View DataSource & Delegate
+- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    VAEgoNameThumbnailCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"NameCell" forIndexPath:indexPath];
+    VAEgoPerson *egoPerson = _selectedEgo[indexPath.row];
+    
+    if (cell) {
+        [cell configureCellWithEgoPerson:egoPerson index:indexPath.row];
+        
+    }
+    
+    return cell;
+    
+}
+
+- (CGSize)collectionView:(UICollectionView *)collectionView
+                  layout:(UICollectionViewLayout *)collectionViewLayout
+  sizeForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    NSLog(@"sizeForItemAtIndexPath :%@", indexPath);
+    return CGSizeMake([UIScreen mainScreen].bounds.size.width / 3, 25);
+}
+
+- (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView
+{
+    return 1;
+}
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
+{
+    return [_selectedEgo count];
+}
+
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context
+{
+    [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+    
+    if ([keyPath isEqualToString:@"selectedEgoPerson"]) {
+        _selectedEgo = change[NSKeyValueChangeNewKey];
+        [self refreshSelectedPerson];
+    }
 }
 
 
