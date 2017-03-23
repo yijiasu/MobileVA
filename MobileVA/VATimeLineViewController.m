@@ -71,10 +71,17 @@
     _currentEgoTitle.text = @"";
     if (self.dataModel) {
         [self.dataModel addObserver:self forKeyPath:@"selectedEgoPerson" options:(NSKeyValueObservingOptionNew|NSKeyValueObservingOptionOld) context:NULL];
+        [self.dataModel addObserver:self forKeyPath:@"currentYear" options:(NSKeyValueObservingOptionNew|NSKeyValueObservingOptionOld) context:NULL];
 
     }
     
 
+}
+
+- (void)dealloc
+{
+    [self.dataModel removeObserver:self forKeyPath:@"selectedEgoPerson"];
+    [self.dataModel removeObserver:self forKeyPath:@"currentYear"];
 }
 
 - (void)initTimelineView
@@ -126,6 +133,10 @@
             [self refreshTimelineWithEgoPerson:self.dataModel.currentEgoPerson];
         }
     }
+    else if ([keyPath isEqualToString:@"currentYear"])
+    {
+        [self switchToYear:self.dataModel.currentYear];
+    }
 }
 
 
@@ -162,10 +173,15 @@
                                                                          @"endyear"   : [NSString stringWithFormat:@"%ld", (long)egoPerson.endYear]
                                                                          }];
     
-    _currentEgoTitle.text = [NSString stringWithFormat:@"%@'s Stroyline", egoPerson.name];
+    _currentEgoTitle.text = [NSString stringWithFormat:@"%@'s Storyline", egoPerson.name];
     [self.webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:urlString]]];
     [self setIsTimelineLoading:YES];
     [self hideSlidingWindowAndImageView];
+    if (self.dataModel.currentYear) {
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            [self switchToYear:self.dataModel.currentYear];
+        });
+    }
 }
 
 - (void)configureDragging
@@ -534,6 +550,12 @@
     }
 }
 
+- (void)switchToYear:(NSInteger)newYear
+{
+    NSInteger yearDistance = labs(self.dataModel.currentEgoPerson.startYear - self.dataModel.currentYear);
+    self.webView.scrollView.contentOffset = CGPointMake((yearDistance - 2) * 100 + 25, 0);
+}
+
 
 #pragma mark Register JS Handler
 
@@ -572,6 +594,7 @@
         }
     }];
 }
+
 
 
 #pragma mark VAViewController View Size Control

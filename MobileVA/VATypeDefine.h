@@ -23,5 +23,12 @@ typedef NS_ENUM(NSUInteger, VAThumbnailPosition) {
 };
 
 
+typedef NS_ENUM(NSUInteger, VADonutSlideDirection) {
+    VADonutSlideDirectionAsceding,
+    VADonutSlideDirectionDesceding
+};
+
+
+
 
 #endif /* VATypeDefine_h */

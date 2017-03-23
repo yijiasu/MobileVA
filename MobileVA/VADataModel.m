@@ -23,8 +23,14 @@
     self = [super init];
     if (self) {
         _selectedEgoPerson = [NSMutableArray new];
+        [self addObserver:self forKeyPath:@"currentYear" options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:NULL];
     }
     return self;
+}
+
+- (void)dealloc
+{
+    [self removeObserver:self forKeyPath:@"currentYear"];
 }
 
 + (instancetype)sharedDataModel
@@ -115,6 +121,13 @@
         NSMutableArray *egoPersons = [self.selectedEgoPerson mutableCopy];
         [egoPersons removeObjectAtIndex:indexToRemove];
         self.selectedEgoPerson = egoPersons;
+    }
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context
+{
+    if ([keyPath isEqualToString:@"currentYear"]) {
+        _slidingDirection = [change[NSKeyValueChangeNewKey] integerValue] - [change[NSKeyValueChangeOldKey] integerValue] > 0 ? VADonutSlideDirectionAsceding : VADonutSlideDirectionDesceding;
     }
 }
 
