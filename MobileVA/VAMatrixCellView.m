@@ -13,7 +13,6 @@
 @property NSInteger level;
 @property (nonatomic, strong) NSMutableArray *viewArray; // 0-Top N-Bottom
 @property (nonatomic, strong) NSMutableArray *valueArray; // 0-Top N-Bottom
-@property BOOL isSimpleMode;
 
 @end
 
@@ -23,7 +22,7 @@
 {
     self = [self initWithFrame:frame];
     if (self) {
-        _isSimpleMode = YES;
+
         
         self.layer.borderWidth = 0.5f;
         self.layer.borderColor = [UIColor lightGrayColor].CGColor;

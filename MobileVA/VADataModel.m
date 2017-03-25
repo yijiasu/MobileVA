@@ -128,6 +128,7 @@
 {
     if ([keyPath isEqualToString:@"currentYear"]) {
         _slidingDirection = [change[NSKeyValueChangeNewKey] integerValue] - [change[NSKeyValueChangeOldKey] integerValue] > 0 ? VADonutSlideDirectionAsceding : VADonutSlideDirectionDesceding;
+        NSLog(@"_slidingDirection = %d", _slidingDirection);
     }
 }
 

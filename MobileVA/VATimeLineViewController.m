@@ -16,6 +16,7 @@
 #import "UIView+draggable.h"
 #import "UIView+DragDrop.h"
 #import "UIWebView+ScreenShot.h"
+#import "VATimeLineMatrixView.h"
 //#import "UIImage+Trim.h"
 
 
@@ -57,6 +58,10 @@
 @property BOOL isInitialized;
 @property (nonatomic) BOOL isTimelineLoading;
 
+// Matrix
+@property (nonatomic, strong) VATimeLineMatrixView *matrixView;
+
+
 @end
 
 @implementation VATimeLineViewController
@@ -74,6 +79,16 @@
         [self.dataModel addObserver:self forKeyPath:@"currentYear" options:(NSKeyValueObservingOptionNew|NSKeyValueObservingOptionOld) context:NULL];
 
     }
+    
+    _matrixView = [[VATimeLineMatrixView alloc] initWithFrame:CGRectMake(0,
+                                                                         0,
+                                                                         [UIScreen mainScreen].bounds.size.width / 3,
+                                                                         [UIScreen mainScreen].bounds.size.width / 3)];
+
+    [_matrixView setHidden:NO];
+    
+    [self.view addSubview:_matrixView];
+
     
 
 }
@@ -604,6 +619,7 @@
     NSLog(@"%@ becomeThumbnailView", self);
     _webView.userInteractionEnabled = NO;
     [self hideControlBar];
+    _matrixView.hidden = NO;
 }
 
 - (void)becomeMainView
@@ -611,6 +627,7 @@
     NSLog(@"%@ becomeMainView", self);
     _webView.userInteractionEnabled = YES;
     [self showControlBar];
+    _matrixView.hidden = YES;
     
 }
 

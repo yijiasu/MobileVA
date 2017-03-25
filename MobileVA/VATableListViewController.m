@@ -10,11 +10,14 @@
 #import "VAEgoNameThumbnailCollectionViewCell.h"
 #import "VAEgoListTableViewCell.h"
 
-@interface VATableListViewController () <UITableViewDelegate, UITableViewDataSource, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout>
+@interface VATableListViewController () <UITableViewDelegate, UITableViewDataSource, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UISearchResultsUpdating>
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
 @property (nonatomic, strong) NSArray *allEgoList;
 @property (nonatomic, strong) NSMutableArray<VAEgoPerson *> *selectedEgo;
+@property (nonatomic, strong) NSArray<VAEgoPerson *> *filteredEgo;
+
 @property (weak, nonatomic) IBOutlet UICollectionView *collectionView;
+@property (nonatomic, strong) UISearchController *searchController;
 
 @end
 
@@ -29,6 +32,12 @@
     
     _selectedEgo = [NSMutableArray new];
     _allEgoList = [[[VAUtil util] coordinator] allEgoPersons];
+    NSSortDescriptor *sortDescriptor;
+    sortDescriptor = [[NSSortDescriptor alloc] initWithKey:@"name"
+                                                 ascending:YES];
+    NSArray *sortDescriptors = [NSArray arrayWithObject:sortDescriptor];
+
+    _allEgoList = [_allEgoList sortedArrayUsingDescriptors:sortDescriptors];
     [_tableView setHidden:YES];
     
     _collectionView.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width / 3, [UIScreen mainScreen].bounds.size.width / 3);
@@ -38,11 +47,25 @@
     
     [self.dataModel addObserver:self forKeyPath:@"selectedEgoPerson" options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:NULL];
     
+    _searchController = [[UISearchController alloc] initWithSearchResultsController:nil];
+    _searchController.searchResultsUpdater = self;
+    _searchController.dimsBackgroundDuringPresentation = NO;
+    _tableView.tableHeaderView = _searchController.searchBar;
+    self.definesPresentationContext = YES;
 }
 
 - (void)dealloc
 {
     [self.dataModel removeObserver:self forKeyPath:@"selectedEgoPerson"];
+}
+
+- (void)updateSearchResultsForSearchController:(UISearchController *)searchController
+{
+    _filteredEgo = [_allEgoList filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(VAEgoPerson * _Nullable evaluatedObject, NSDictionary<NSString *,id> * _Nullable bindings) {
+        return [[evaluatedObject.name lowercaseString] containsString:[searchController.searchBar.text lowercaseString]];
+    }]];
+    
+    [_tableView reloadData];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -58,6 +81,7 @@
     NSLog(@"%@ becomeThumbnailView", self);
     [self.tableView setHidden:YES];
     [self.collectionView setHidden:NO];
+    _searchController.view.hidden = YES;
     
 }
 
@@ -66,6 +90,7 @@
     NSLog(@"%@ becomeMainView", self);
     [self.tableView setHidden:NO];
     [self.collectionView setHidden:YES];
+    _searchController.view.hidden = NO;
     
     _selectedEgo = [[[VAUtil util] model].selectedEgoPerson mutableCopy];
     [_tableView reloadData];
@@ -74,7 +99,15 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     VAEgoListTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"EgoListCell" forIndexPath:indexPath];
-    VAEgoPerson *egoPerson = _allEgoList[indexPath.row];
+    VAEgoPerson *egoPerson;
+    if (_searchController.active && [_searchController.searchBar.text length] != 0) {
+        egoPerson = _filteredEgo[indexPath.row];
+    }
+    else
+    {
+        egoPerson = _allEgoList[indexPath.row];
+    }
+    
     if (cell) {
         [cell configureCellWithEgoPerson:egoPerson];
         if ([self.dataModel.selectedEgoPerson containsObject:egoPerson]) {
@@ -95,7 +128,13 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return [_allEgoList count];
+    if (_searchController.active && [_searchController.searchBar.text length] != 0) {
+        return [_filteredEgo count];
+    }
+    else
+    {
+        return [_allEgoList count];
+    }
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
@@ -105,8 +144,16 @@
 //    [cell setAccessoryType:UITableViewCellAccessoryCheckmark];
 //
     
-    VAEgoPerson *person = _allEgoList[indexPath.row];
-    [self togglePerson: person];
+    VAEgoPerson *egoPerson;
+    if (_searchController.active && [_searchController.searchBar.text length] != 0) {
+        egoPerson = _filteredEgo[indexPath.row];
+    }
+    else
+    {
+        egoPerson = _allEgoList[indexPath.row];
+    }
+    
+    [self togglePerson: egoPerson];
     [self refreshSelectedPerson];
 }
 

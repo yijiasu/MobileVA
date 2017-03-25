@@ -9,7 +9,7 @@
 #import "VAMDSViewController.h"
 #import <WebViewJavascriptBridge/WebViewJavascriptBridge.h>
 #import <PureLayout/PureLayout.h>
-#import "VAMatrixView.h"
+#import "VAMDSMatrixView.h"
 #import "VADataModel.h"
 #import "WToast.h"
 
@@ -18,7 +18,7 @@
 @property (weak, nonatomic) IBOutlet UIWebView *webView;
 @property (weak, nonatomic) IBOutlet UILabel *selectedPersonLabel;
 @property (nonatomic, strong) WebViewJavascriptBridge* bridge;                  // JS Bridge For WebView
-@property (nonatomic, strong) VAMatrixView *matrixView;
+@property (nonatomic, strong) VAMDSMatrixView *matrixView;
 @property (nonatomic, strong) NSMutableArray<VAEgoPerson *> *selectedEgo;
 
 @property NSInteger currentYear;
@@ -32,10 +32,10 @@
     [self configureWebView];
     
     _selectedEgo = [NSMutableArray new];
-    _matrixView = [[VAMatrixView alloc] initWithFrame:CGRectMake(0,
-                                                                 0,
-                                                                 [UIScreen mainScreen].bounds.size.width / 3,
-                                                                 [UIScreen mainScreen].bounds.size.width / 3)];
+    _matrixView = [[VAMDSMatrixView alloc] initWithFrame:CGRectMake(0,
+                                                                    0,
+                                                                    [UIScreen mainScreen].bounds.size.width / 3,
+                                                                    [UIScreen mainScreen].bounds.size.width / 3)];
     
 //    [_matrixView setMatrixDimension:3];
     [_matrixView setHidden:NO];
@@ -212,6 +212,9 @@
     else
     {
         self.selectedPersonLabel.text = [NSString stringWithFormat:@"Selected Person: %@", [[self.dataModel egoPersonNameArray] componentsJoinedByString:@", "]];
+        NSString *evalJS = [NSString stringWithFormat:@"setHighlight(['%@'])", [[self.dataModel egoPersonNameArray] componentsJoinedByString:@"','"]];
+        [_webView stringByEvaluatingJavaScriptFromString:@"clearHighlight()"];
+        [_webView stringByEvaluatingJavaScriptFromString:evalJS];
     }
 }
 

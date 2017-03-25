@@ -7,14 +7,8 @@
 //
 
 #import "VAMatrixView.h"
-#import "VAMatrixCellView.h"
 @interface VAMatrixView ()
 
-@property (nonatomic, strong) NSMutableArray *viewArray;
-@property (nonatomic, strong) NSArray<VAEgoPerson *> *egoList;
-@property (nonatomic, strong) VADataModel *dataModel;
-@property (nonatomic, strong) UIView *matrixPlaceholder;
-@property BOOL shouldRefreshTitle;
 
 @end
 
@@ -26,10 +20,7 @@
     if (self) {
         self.backgroundColor = [UIColor whiteColor];
         self.dataModel = [VAUtil util].model;
-        if (self.dataModel) {
-            [self.dataModel addObserver:self forKeyPath:@"currentYear" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld context:NULL];
-            [self.dataModel addObserver:self forKeyPath:@"selectedEgoPerson" options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld context:NULL];
-        }
+
         if (!_matrixPlaceholder) {
             
             _matrixPlaceholder = [[UIView alloc] initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width / 3, [UIScreen mainScreen].bounds.size.width / 3)];
@@ -57,25 +48,6 @@
 - (void)didMoveToSuperview
 {
     [self drawMatrixPlaceholder];
-}
-
-- (void)dealloc
-{
-    [self.dataModel removeObserver:self forKeyPath:@"selectedEgoPerson"];
-}
-
-- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context
-{
-    if ([keyPath isEqualToString:@"selectedEgoPerson"]) {
-        _egoList = change[NSKeyValueChangeNewKey];
-        _shouldRefreshTitle = YES;
-        [self redrawMatrixViewForYear:self.dataModel.currentYear];
-
-    }
-    else if ([keyPath isEqualToString:@"currentYear"]) {
-        [self redrawMatrixViewForYear:self.dataModel.currentYear];
-    }
-    
 }
 
 - (void)setMatrixDimension:(NSInteger)dim
@@ -212,65 +184,9 @@
 }
 
 
-- (void)redrawMatrixViewForYear:(NSInteger)newYear
+- (VAMatrixCellView *)getCellAtPoint:(CGPoint)point
 {
-    VADataCoordinator *coordinator = [VAUtil util].coordinator;
-    
-    NSArray *egoList = [self.dataModel egoPersonNameArray];
-    
-    // Check Dimesion
-    if (self.currentDimension != [self.dataModel.selectedEgoPerson count]) {
-        [self setMatrixDimension:[self.dataModel.selectedEgoPerson count]];
-    }
-    
-    NSDictionary *result = [coordinator queryEgoDistanceForYear:newYear egoList:egoList];
-    
-    NSMutableArray *array = [NSMutableArray new];
-    for (int i = 0; i < [egoList count]; i++) {
-        NSString *yValue = result[egoList[i]];
-        if (!yValue) {
-            NSMutableArray *tmpArray = [NSMutableArray new];
-            for (int k = 0; k < [egoList count]; k++) {
-                [tmpArray addObject:@(-1)];
-            }
-            [array addObject:tmpArray];
-        }
-        else
-        {
-            NSMutableArray *rowArray = [NSMutableArray new];
-            for (int j = 0; j < [egoList count]; j++) {
-                NSString *xValue = result[egoList[j]];
-                if (!xValue) {
-                    [rowArray addObject:@(-1)];
-                }
-                else
-                {
-                    NSArray *p1Array = [yValue componentsSeparatedByString:@","];
-                    NSArray *p2Array = [xValue componentsSeparatedByString:@","];
-                    CGPoint p1 = CGPointMake([p1Array[0] floatValue], [p1Array[1] floatValue]);
-                    CGPoint p2 = CGPointMake([p2Array[0] floatValue], [p2Array[1] floatValue]);
-                    
-                    CGFloat distance = sqrt(pow(p1.x - p2.x, 2) + pow(p1.y - p2.y, 2));
-                    
-                    [rowArray addObject:@(distance * 40)];
-                }
-            }
-            [array addObject:rowArray];
-        }
-        
-    }
-    NSLog(@"Query Result = %@", result);
-    NSLog(@"Calc Result = %@", array);
-    
-    [array enumerateObjectsUsingBlock:^(NSArray * _Nonnull subArray, NSUInteger idY, BOOL * _Nonnull stop) {
-        [subArray enumerateObjectsUsingBlock:^(NSNumber  * _Nonnull value, NSUInteger idX, BOOL * _Nonnull stop) {
-            [self pushValue:[value integerValue] atPoint:CGPointMake(idX, idY)];
-        }];
-    }];
-    
-    [self refreshEgoTitle];
-
+    return _viewArray[(int)point.x][(int)point.y];
 }
-
 
 @end

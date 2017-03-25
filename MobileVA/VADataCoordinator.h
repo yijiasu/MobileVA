@@ -16,6 +16,7 @@
 - (NSDictionary *)egoPersonDataWithName:(NSString *)egoName;
 - (VAEgoPerson *)egoPersonWithName:(NSString *)egoName;
 - (NSDictionary *)queryEgoDistanceForYear:(NSInteger)year egoList:(NSArray<NSString *> *)egoList;
+- (NSDictionary *)queryTieStrengthForYear:(NSInteger)year egoList:(NSArray<NSString *> *)egoList;
 - (NSArray<VAEgoPerson *> *)allEgoPersons;
 
 

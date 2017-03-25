@@ -130,6 +130,36 @@
     
 }
 
+- (NSDictionary *)queryTieStrengthForYear:(NSInteger)year egoList:(NSArray<NSString *> *)egoList
+{
+    NSMutableDictionary *returnResult = [NSMutableDictionary new];
+    NSDictionary *yearDict = [self getOverviewDataForYear:year][@"value"];
+    
+    for (int i = 0; i < egoList.count; i++) {
+        
+        for (int k = i+1; k < egoList.count; k++) {
+            NSString *primaryEgoName = egoList[i];
+            NSString *compareEgoName = egoList[k];
+            NSDictionary *tsArray = yearDict[primaryEgoName][@"info"][@"tieStrength"];
+            if (tsArray[compareEgoName]) {
+                returnResult[[NSString stringWithFormat:@"%@,%@", primaryEgoName, compareEgoName]] = tsArray[compareEgoName];
+            }
+        }
+    }
+    
+    NSMutableDictionary *reverseDict = [NSMutableDictionary new];
+    
+    [returnResult enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
+        NSArray *tmpArray =  [key componentsSeparatedByString:@","];
+        NSString *newKey = [NSString stringWithFormat:@"%@,%@", tmpArray[1], tmpArray[0]];
+        reverseDict[newKey] = obj;
+    }];
+    
+    [returnResult addEntriesFromDictionary:reverseDict];
+    return returnResult;
+    
+}
+
 - (NSArray<VAEgoPerson *> *)allEgoPersons
 {
     return _egoArray;

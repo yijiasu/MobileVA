@@ -24,15 +24,17 @@
 
 @property (nonatomic) VAViewControllerType activeViewType;
 @property (nonatomic, strong) NSMutableArray *thumbnailOrder;
+@property (nonatomic, strong) NSMutableArray *tipViews;
 
 
 @property CGSize screenSize;
 @property CGSize thumbnailSize;
 @property CGSize mainViewSize;
-
 @end
 
 @implementation VAHomeViewController
+
+const NSInteger TIP_VIEW_HEIGHT = 20;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -47,7 +49,6 @@
     [self relocateViews];
     
     self.dataModel.activeViewType = _activeViewType;
-
     
 }
 
@@ -112,12 +113,76 @@
                                     _thumbnailSize.width,
                                     _thumbnailSize.height)];
     
+
+    
+    NSString *viewTipText;
+    for (int i = 0; i <= 2; i++) {
+        switch ([_thumbnailOrder[i] integerValue]) {
+            case VAViewControllerTypeVideo:
+                viewTipText = @"VIDEO";
+                break;
+            case VAViewControllerTypeMDS:
+                viewTipText = @"MDS";
+                break;
+            case VAViewControllerTypeTimeLine:
+                viewTipText = @"STORYLINE";
+                break;
+            case VAViewControllerTypeTable:
+                viewTipText = @"TABLE";
+                break;
+
+        }
+        
+        [self setTipViewText:viewTipText parentView:[self getViewByType:[_thumbnailOrder[i] integerValue]] index:i];
+
+    }
+    
 //    [(VAViewController *)[mainView  associatedObject] setIsMinimized:NO];
 //    [(VAViewController *)[leftView  associatedObject] setIsMinimized:YES];
 //    [(VAViewController *)[midView   associatedObject] setIsMinimized:YES];
 //    [(VAViewController *)[rightView associatedObject] setIsMinimized:YES];
 
     
+}
+
+- (void)setTipViewText:(NSString *)text parentView:(UIView *)parentView index:(NSInteger)index
+{
+    
+    if (index > 3) {
+        return;
+    }
+    
+    if (!_tipViews) {
+        _tipViews = [NSMutableArray new];
+        
+        
+        for (int i = 0; i < 3; i ++) {
+            UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, TIP_VIEW_HEIGHT, TIP_VIEW_HEIGHT)];
+            [label setBackgroundColor: [[VAUtil util] colorSchemaForMatrixIndex:i]];
+            [label setTextAlignment:NSTextAlignmentCenter];
+            [label setTextColor:[UIColor whiteColor]];
+//            [label setAlpha:0.7];
+            [label setFont:[UIFont systemFontOfSize:13.0f]];
+            
+            [_tipViews addObject:label];
+            [self.view addSubview:label];
+        }
+
+    }
+    UILabel *label = _tipViews[index];
+    
+    [label setText:text];
+    if ([self getViewByType:_activeViewType] == parentView) {
+        [label setHidden:YES];
+    }
+    else
+    {
+        [label setFrame:CGRectMake(parentView.frame.origin.x,
+                                  parentView.frame.origin.y - TIP_VIEW_HEIGHT,
+                                  parentView.frame.size.width,
+                                   TIP_VIEW_HEIGHT)];
+        
+    }
 }
 
 - (UIView *)getViewByType:(VAViewControllerType)viewType

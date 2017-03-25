@@ -20,6 +20,7 @@
 @property VAViewControllerType activeViewType;
 @property (nonatomic, strong) UIImage *croppedVideoImage;
 @property VADonutSlideDirection slidingDirection;                               // 1-> sliding to bottom, -1 -> sliding to top
+@property (nonatomic, strong) NSArray *currentMDSMatrixData;
 
 - (void)inputEgoPersonFromVideo:(VAEgoPerson *)egoPerson;
 - (void)removeEgoPersonFromVideo;

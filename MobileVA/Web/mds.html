@@ -265,6 +265,23 @@
 
     }
 
+    function clearHighlight()
+    {
+      $("circle[data-highlight=true]").attr("r","2.5").attr("fill", "grey").attr("fill-opacity", "0.3");
+      $("circle[data-highlight=true]").removeAttr("data-highlight");
+    }
+
+    function setHighlight(highligh_nodes)
+    {
+      _.each(highligh_nodes, function(node_key){
+        var node = $("circle[data-key='"  + node_key + "']");
+        node.attr("fill", "red");
+        node.attr("fill-opacity", "1");
+        node.attr("r", "4");
+        node.attr("data-highlight", true);
+      });
+    }
+
     function startUp(bridge)
     {
       if (isNaN(parseInt(getParameterByName("width"))) || isNaN(parseInt(getParameterByName("height"))))
