@@ -36,8 +36,11 @@ const float FACE_DISAPPEAR_TOLERANCE_TIME = 2;
 
 // Web View
 @property (nonatomic, strong) UIWebView *webView;                               // WebView For Donut
+@property (nonatomic, strong) NSMutableArray<UIWebView *> *accompanyViews;             // Collection of WebView For Accompany, which each element has an associated object as its webview bridge
+
 @property (nonatomic, strong) UIView *touchView;                                // Touch View
 @property (nonatomic, strong) WebViewJavascriptBridge* bridge;                  // JS Bridge For WebView
+@property (nonatomic, strong) WebViewJavascriptBridge* accBridge;                  // JS Bridge For WebView
 
 @property (nonatomic, strong) NSTimer *trackingFrameRefreshTimer;
 
@@ -45,6 +48,8 @@ const float FACE_DISAPPEAR_TOLERANCE_TIME = 2;
 // Data Model
 
 @property (nonatomic, strong) VAEgoPerson *currentEgoPerson;
+@property (nonatomic, strong) NSMutableArray<VAEgoPerson *> *accompanyEgoPersons;
+
 @property NSInteger currentYear;
 
 @property BOOL isUsingTouchView;
@@ -56,14 +61,23 @@ const float FACE_DISAPPEAR_TOLERANCE_TIME = 2;
 @property BOOL isShouldCrop;                                                    // if YES, get Face Frame
 
 
+// Tip View
+@property (weak, nonatomic) IBOutlet UIVisualEffectView *tipView;
+@property (weak, nonatomic) IBOutlet UILabel *egoNameLabel;
+@property (weak, nonatomic) IBOutlet UILabel *tipContentLabel;
+
 // Thumbnail View
 @property (nonatomic, strong) UIVisualEffectView *visEffectView;
 @property (nonatomic, strong) UIVisualEffectView *vibrancyEffectView;
 @property (nonatomic, strong) UILabel *yearLabel;
 
+@property (nonatomic, weak) VAEgoPerson *lastInteractedPerson;
+@property BOOL isUpdateTipFrozen;
 @end
 
 @implementation VAVideoViewController
+
+const NSInteger MAX_ACCOMPANY_VIEWS = 1;
 
 - (void)viewDidLoad {
     
@@ -75,7 +89,8 @@ const float FACE_DISAPPEAR_TOLERANCE_TIME = 2;
     [self configureData];
     [self addObserver:self forKeyPath:@"currentFaceID" options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:NULL];
     [self addObserver:self forKeyPath:@"currentEgoPerson" options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:NULL];
-    
+    [self.dataModel addObserver:self forKeyPath:@"selectedEgoPerson" options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:NULL];
+
     UIBlurEffect *blurEffect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleLight];
     _visEffectView = [[UIVisualEffectView alloc] initWithEffect:blurEffect];
     _visEffectView.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width / 3, [UIScreen mainScreen].bounds.size.width / 3);
@@ -100,12 +115,26 @@ const float FACE_DISAPPEAR_TOLERANCE_TIME = 2;
 
     [_vibrancyEffectView.contentView addSubview:labelForHint];
     [_vibrancyEffectView.contentView addSubview:_yearLabel];
-
+    
+    _tipView.hidden = YES;
+    
+    UIBlurEffect *darkBlurEffect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleDark];
+    _tipView.effect = darkBlurEffect;
+    [_egoNameLabel removeFromSuperview];
+    [_tipContentLabel removeFromSuperview];
+    
+    [_tipView.contentView addSubview:_egoNameLabel];
+    [_tipView.contentView addSubview:_tipContentLabel];
+    _tipView.layer.zPosition = MAXFLOAT;
+    _tipView.layer.cornerRadius = 6.0f;
+    _tipView.clipsToBounds = YES;
 }
 
 - (void)viewDidLayoutSubviews
 {
     [self configureWebView];
+    [self setupAccompanyViews];
+    [self layoutTipView];
     self.videoPreviewLayer.frame = self.webView.bounds;
 }
 
@@ -130,7 +159,7 @@ const float FACE_DISAPPEAR_TOLERANCE_TIME = 2;
     }
     
     if (!_smoother) {
-        _smoother = [[FDSmoother alloc] initWithMAWindowSizeForSize:12 location:10];
+        _smoother = [[FDSmoother alloc] initWithMAWindowSizeForSize:12 location:20];
         _smoother.delegate = self;
     }
     
@@ -162,7 +191,7 @@ const float FACE_DISAPPEAR_TOLERANCE_TIME = 2;
         _webView.scrollView.bounces = NO;
     
         
-        [self registerJSHandler];
+        [self registerJSHandlerForWebview:_webView];
         [self.view addSubview:_webView];
         
         [_webView autoPinEdgesToSuperviewEdges];
@@ -183,17 +212,19 @@ const float FACE_DISAPPEAR_TOLERANCE_TIME = 2;
 - (void)refreshVisOverlayWithCurrentEgoPersonWithFaceID:(NSInteger)faceID
 {
     if (_currentEgoPerson) {
-        NSString *urlString = [[VAService defaultService] URLWithComponent:@"pie.html"
-                                                                     width:CGRectGetWidth(_videoView.frame)
-                                                                    height:CGRectGetHeight(_videoView.frame)
-                                                                    params:@{@"egoname" : _currentEgoPerson.name}];
-        [_webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString: urlString]]];
-        [_webView setTag:faceID];
-        if (_webView.alpha == 0) {
-            [UIView animateWithDuration:0.3f delay:0.3f options:0
-                             animations:^{
-                                 _webView.alpha = 1;
-                             } completion:nil];
+        if ([_webView tag] != faceID) {
+            NSString *urlString = [[VAService defaultService] URLWithComponent:@"pie.html"
+                                                                         width:CGRectGetWidth(_videoView.frame)
+                                                                        height:CGRectGetHeight(_videoView.frame)
+                                                                        params:@{@"egoname" : _currentEgoPerson.name}];
+            [_webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString: urlString]]];
+            [_webView setTag:faceID];
+            if (_webView.alpha == 0) {
+                [UIView animateWithDuration:0.3f delay:0.3f options:0
+                                 animations:^{
+                                     _webView.alpha = 1;
+                                 } completion:nil];
+            }
         }
 //        [_webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"document.location=%@", urlString]];
 ////        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
@@ -221,6 +252,8 @@ const float FACE_DISAPPEAR_TOLERANCE_TIME = 2;
             NSLog(@"Removed");
             self.currentEgoPerson = nil;
             [self.dataModel removeEgoPersonFromVideo];
+            [self hideAccompanyViews];
+            self.tipView.hidden = YES;
         }
     }
     else
@@ -432,8 +465,12 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
 
     [_webView setFrame:CGRectMake(cx - 0.5 * webViewWidth,
                                   cy - 1.5 * webViewWidth,
-                                  webViewWidth + 100,
+                                  webViewWidth,
                                   3 * webViewWidth)];
+    
+    if ([self.dataModel.selectedEgoPerson count] > 1) {
+        [self refreshAccompanyVisWithRadius:_radius];
+    }
 }
 
 #pragma mark Handle Gesture
@@ -455,27 +492,47 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
 
 #pragma mark Register JS Handler
 
-- (void)registerJSHandler
+- (void)registerJSHandlerForWebview:(UIWebView *)webview
 {
-    // Configure Bridege
-    _bridge = [WebViewJavascriptBridge bridgeForWebView:_webView];
-    
-    [_bridge registerHandler:@"onJSONLoadFinish" handler:^(id data, WVJBResponseCallback responseCallback) {
-        NSLog(@"JSON Data Load Finish");
-    }];
-    
-    [_bridge registerHandler:@"onEgoScrollEnd" handler:^(id data, WVJBResponseCallback responseCallback) {
+    if (webview == _webView) {
+        // if Main View
+        // Configure Bridege
+        _bridge = [WebViewJavascriptBridge bridgeForWebView:webview];
         
-        NSInteger index = [data[@"index"] integerValue];
-        NSInteger currentYear = [[self.currentEgoPerson.years objectAtIndex:index] integerValue];
-        _currentYear = currentYear;
-        [self refreshThumbnailView];
+//        [_bridge registerHandler:@"onJSONLoadFinish" handler:^(id data, WVJBResponseCallback responseCallback) {
+//            NSLog(@"JSON Data Load Finish");
+//        }];
         
-        NSLog(@"Ego Scroll Current Index = %d", [data[@"index"] integerValue]);
-        [self.dataModel videoViewController:self donutDidScrollToIndex:[data[@"index"] integerValue]];
-        
-        
-    }];
+        [_bridge registerHandler:@"onEgoScrollEnd" handler:^(id data, WVJBResponseCallback responseCallback) {
+            
+            NSLog(@"Ego Scroll Current Index = %d", [data[@"index"] integerValue]);
+
+            NSInteger index = [data[@"index"] integerValue];
+            NSInteger currentYear = [[self.currentEgoPerson.years objectAtIndex:index] integerValue];
+            _currentYear = currentYear;
+            self.dataModel.currentYear = currentYear;
+            [self refreshThumbnailView];
+            [self egoPerson:_currentEgoPerson donutDidSlideToIndex:index year:currentYear];
+            
+        }];
+
+    }
+    else
+    {
+        // if accompany view
+        _accBridge = [WebViewJavascriptBridge bridgeForWebView:webview];
+        [_accBridge registerHandler:@"onEgoScrollEnd" handler:^(id data, WVJBResponseCallback responseCallback) {
+            
+
+            NSInteger index = [data[@"index"] integerValue];
+            NSInteger accViewIndex = [self indexOfAccompanyView:webview];
+            VAEgoPerson *egoPerson = self.accompanyEgoPersons[accViewIndex];
+            NSInteger currentYear = [[egoPerson.years objectAtIndex:index] integerValue];
+            
+            NSLog(@"accViewIndex = %ld; Accompany Ego Scroll Current Index = %d", accViewIndex, [data[@"index"] integerValue]);
+            [self accompanyEgoPerson:egoPerson donutDidSlideToIndex:index year:currentYear];
+        }];
+    }
     
     
 }
@@ -500,6 +557,12 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     _isRecognizeSuspended = YES;
     self.visEffectView.hidden = NO;
     [self refreshThumbnailView];
+    
+    [_accompanyViews enumerateObjectsUsingBlock:^(UIWebView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        [obj setHidden:YES];
+        [obj setUserInteractionEnabled:NO];
+    }];
+    _tipView.hidden = YES;
 }
 
 - (void)becomeMainView
@@ -509,6 +572,12 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     self.webView.hidden = NO;
     self.visEffectView.hidden = YES;
     _isRecognizeSuspended = NO;
+    
+    [_accompanyViews enumerateObjectsUsingBlock:^(UIWebView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        [obj setHidden:NO];
+        [obj setUserInteractionEnabled:YES];
+    }];
+
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context
@@ -530,13 +599,10 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
             });
         }
     }
-//    else if([keyPath isEqualToString:@"currentEgoPerson"])
-//    {
-//        NSLog(@"%@", change);
-//        if (change[NSKeyValueChangeNewKey] == [NSNull null]) {
-//            self
-//        }
-//    }
+    else if([keyPath isEqualToString:@"selectedEgoPerson"])
+    {
+        [self updateAccompanyViewsWithEgoPersons:change[NSKeyValueChangeNewKey]];
+    }
 }
 
 - (void)dealloc
@@ -588,5 +654,225 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
 {
     _yearLabel.text = [NSString stringWithFormat:@"%ld", _currentYear];
 }
+
+
+#pragma mark Accompany Views
+
+- (NSInteger)indexOfAccompanyView:(UIWebView *)accView
+{
+    return [self.accompanyViews indexOfObject:accView];
+}
+
+- (void)setupAccompanyViews
+{
+    if (!_accompanyViews) {
+        _accompanyViews = [NSMutableArray new];
+        
+        for (int i = 0; i < MAX_ACCOMPANY_VIEWS; i++) {
+            
+            UIWebView *webview = [[UIWebView alloc] initWithFrame:_videoView.frame];
+            webview.delegate = self;
+            webview.opaque = NO;
+            webview.backgroundColor = [UIColor clearColor];
+            webview.scrollView.bounces = NO;
+            webview.hidden = YES;
+            webview.userInteractionEnabled = NO;
+            
+            // To be finish
+            [self.view addSubview:webview];
+            [_accompanyViews addObject:webview];
+
+            [self registerJSHandlerForWebview:webview];
+
+        }
+    }
+    
+}
+
+- (void)updateAccompanyViewsWithEgoPersons:(NSArray<VAEgoPerson *> *)egoPersons
+{
+    NSArray *showPersons = [egoPersons mutableCopy];
+    [(NSMutableArray *)showPersons removeObject:self.currentEgoPerson];
+    showPersons = [showPersons subarrayWithRange:NSMakeRange(0, MIN(MAX_ACCOMPANY_VIEWS, showPersons.count))];
+    
+    _accompanyEgoPersons = [showPersons mutableCopy];
+    [showPersons enumerateObjectsUsingBlock:^(VAEgoPerson *  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        [self loadEgoPerson:obj atAccompanyViewIndex:idx];
+    }];
+}
+
+- (void)loadEgoPerson:(VAEgoPerson *)egoPerson atAccompanyViewIndex:(NSInteger)index
+{
+    //   0 (MAINVIEW)
+    //   0 (MAINVIEW) 1
+    // 2 0 (MAINVIEW) 1
+    // 2 0 (MAINVIEW) 1 3
+    // 2 0 (MAINVIEW) 1 3 5
+    
+    
+    UIWebView *accWebview = self.accompanyViews[index];
+    accWebview.hidden = NO;
+
+    NSString *urlString = [[VAService defaultService] URLWithComponent:@"pie.html"
+                                                                 width:CGRectGetWidth(_webView.frame)
+                                                                height:CGRectGetHeight(_webView.frame)
+                                                                params:@{@"egoname" : egoPerson.name}];
+    [accWebview loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString: urlString]]];
+
+}
+
+- (void)accompanyEgoPerson:(VAEgoPerson *)egoPerson donutDidSlideToIndex:(NSInteger)index year:(NSInteger)year
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self updateTipViewForEgoPerson:egoPerson selectedYear:year];
+    });
+
+    NSString *yearString = [NSString stringWithFormat:@"%ld", year];
+
+    // Check if this year is existed in Main Person
+    if ([self.dataModel.currentEgoPerson.years containsObject:yearString]) {
+        [self slideEgoPersonDonutToIndex:[self.dataModel.currentEgoPerson.years indexOfObject:yearString] inWebview:_webView];
+    }
+    
+//    // Check if this year is existed in all other e
+//    
+//    NSInteger accIndex = [self.accompanyEgoPersons indexOfObject:egoPerson];
+//    [_accompanyViews enumerateObjectsUsingBlock:^(UIWebView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+//        if (idx == accIndex) {
+//            return;
+//        }
+//        
+//        VAEgoPerson *egoPerson = self.accompanyEgoPersons[idx];
+//        if ([egoPerson.years containsObject:@(year)]) {
+//            [self slideEgoPersonDonutToIndex:[egoPerson.years indexOfObject:@(year)] inWebview:obj];
+//        }
+//    }];
+}
+
+- (void)egoPerson:(VAEgoPerson *)egoPerson donutDidSlideToIndex:(NSInteger)index year:(NSInteger)year
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self updateTipViewForEgoPerson:egoPerson selectedYear:year];
+    });
+    if ([_accompanyEgoPersons count]) {
+        NSString *yearString = [NSString stringWithFormat:@"%ld", year];
+        VAEgoPerson *accEgoPerson = _accompanyEgoPersons[0];
+        
+        // Check if this year is existed in Main Person
+        if ([accEgoPerson.years containsObject:yearString]) {
+            [self slideEgoPersonDonutToIndex:[accEgoPerson.years indexOfObject:yearString] inWebview:_accompanyViews[0]];
+        }
+    }
+    
+}
+
+- (void)slideEgoPersonDonutToIndex:(NSInteger)index inWebview:(UIWebView *)webview
+{
+    NSString *scriptToExecute = [NSString stringWithFormat:@"moveToSelectedIndex(%ld)", (long)index];
+    NSLog(@"%@", scriptToExecute);
+    [webview stringByEvaluatingJavaScriptFromString:scriptToExecute];
+}
+- (void)refreshAccompanyVisWithRadius:(CGFloat)radius
+{
+    if ([_accompanyViews count] == 1) {
+        [_accompanyViews enumerateObjectsUsingBlock:^(UIWebView * _Nonnull webview, NSUInteger idx, BOOL * _Nonnull stop) {
+            CGFloat centerX = _webView.frame.origin.x + _webView.frame.size.width / 2;
+            CGFloat width = _webView.frame.size.width;
+            CGFloat height = _webView.frame.size.height;
+            NSInteger alignFactor = -1;
+            if (_lastRect.origin.x < (_lastRect.size.width)) {
+                // if no enough space on left side
+                alignFactor = 1;
+            }
+            else if ((_videoView.frame.size.width - _lastRect.origin.x - _lastRect.size.width) < (_lastRect.size.width))
+            {
+                // if no enough space on right side
+                alignFactor = -1;
+            }
+            
+            
+            CGRect newFrame;
+            if (alignFactor == -1) {
+                newFrame = CGRectMake(centerX - 0.5 * width - width,
+                                      _webView.frame.origin.y,
+                                      width,
+                                      height);
+
+            }
+            else
+            {
+                newFrame = CGRectMake(centerX + 0.5 * width,
+                                      _webView.frame.origin.y,
+                                      width,
+                                      height);
+
+            }
+            
+            
+            [webview setFrame:newFrame];
+            
+            NSString *pieData = [NSString stringWithFormat:@"move(%d,%d,%f)", 0, 0, radius];
+            [webview stringByEvaluatingJavaScriptFromString:pieData];
+            
+            
+        }];
+
+    }
+}
+
+- (void)updateTipViewForEgoPerson:(VAEgoPerson *)egoPerson selectedYear:(NSInteger)year
+{
+//    _tipView.hidden = NO;
+    if (_isUpdateTipFrozen) {
+        return;
+    }
+    if (!egoPerson) {
+        _tipView.hidden = YES;
+    }
+    _tipView.hidden = NO;
+    _egoNameLabel.text = [NSString stringWithFormat:@"%@", egoPerson.name];
+
+    NSDictionary *dataDict = [egoPerson alterChangeForYear:year];
+    
+    NSArray *contentArray = @[
+                              [NSString stringWithFormat:@"Publication of %ld: %ld", year, [egoPerson publicationCountForYear:year]],
+                              [NSString stringWithFormat:@"Second Degree Alters: %ld", [egoPerson secLevelAlterCountForYear:year]],
+                              [NSString stringWithFormat:@"Direct Alters: %@ Density: %.2f", dataDict[@"count"], [egoPerson densityForYear:year]],
+                              [NSString stringWithFormat:@"[New: %ld  Weaker: %ld  Same-Tie: %ld  Stronger: %ld]",
+                               [dataDict[@"new"] count],
+                               [dataDict[@"weaker"] count],
+                               [dataDict[@"same"] count],
+                               [dataDict[@"stronger"] count]]
+                              ];
+    _tipContentLabel.text = [NSString stringWithFormat:@"%@", [contentArray componentsJoinedByString:@"\n"]];
+    _isUpdateTipFrozen = YES;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.8 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        _isUpdateTipFrozen = NO;
+    });
+    
+}
+
+- (void)hideAccompanyViews
+{
+    [_accompanyViews enumerateObjectsUsingBlock:^(UIWebView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        [obj setHidden:YES];
+    }];
+}
+
+- (void)layoutTipView
+{
+    _egoNameLabel.frame = CGRectMake(0, 4, _tipView.frame.size.width, 20);
+    _tipContentLabel.frame = CGRectMake(0, 22, _tipView.frame.size.width, _tipView.frame.size.height - 20);
+}
+#pragma mark Ego Person Sliding
+
+//- (void)videoViewController:(VAVideoViewController *)videoVC donutDidScrollToIndex:(NSInteger)dountIndex
+//{
+//    NSString *yearOfSelection = [self.currentEgoPerson.years objectAtIndex:dountIndex];
+//    NSLog(@"Did Scroll To Year = %@", yearOfSelection);
+//    [self setCurrentYear:[yearOfSelection integerValue]];
+//    
+//}
+
 @end
 

@@ -17,7 +17,7 @@
 
 + (instancetype)util;
 
-@property (nonatomic, strong) VADataModel<VAVideoViewControllerDelegate> *model;
+@property (nonatomic, strong) VADataModel *model;
 @property (nonatomic, strong) VADataCoordinator *coordinator;
 @property (nonatomic, strong) VAService *service;
 

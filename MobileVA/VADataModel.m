@@ -51,14 +51,6 @@
 }
 
 
-- (void)videoViewController:(VAVideoViewController *)videoVC donutDidScrollToIndex:(NSInteger)dountIndex
-{
-    NSString *yearOfSelection = [self.currentEgoPerson.years objectAtIndex:dountIndex];
-    NSLog(@"Did Scroll To Year = %@", yearOfSelection);
-    [self setCurrentYear:[yearOfSelection integerValue]];
-    
-}
-
 - (VAEgoPerson *)currentEgoPerson
 {
     

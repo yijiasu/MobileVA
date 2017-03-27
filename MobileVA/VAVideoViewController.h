@@ -11,17 +11,8 @@
 #import "VADataModel.h"
 
 @class VAVideoViewController;
-
-@protocol VAVideoViewControllerDelegate <NSObject>
-
-- (void)videoViewController:(VAVideoViewController *)videoVC donutDidScrollToIndex:(NSInteger)dountIndex;
-
-@end
-
 @interface VAVideoViewController : VAViewController <VAViewControllerProtocol>
 
 - (void)loadEgoPerson:(VAEgoPerson *)egoPerson;
-
-@property (nonatomic, weak) VADataModel<VAVideoViewControllerDelegate>* dataModel;
 
 @end

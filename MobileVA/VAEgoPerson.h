@@ -24,4 +24,9 @@
 
 @property (readonly) NSDictionary *dictData;
 
+- (NSDictionary *)alterChangeForYear:(NSInteger)year;
+- (CGFloat)densityForYear:(NSInteger)year;
+- (NSInteger)secLevelAlterCountForYear:(NSInteger)year;
+- (NSInteger)publicationCountForYear:(NSInteger)year;
+
 @end

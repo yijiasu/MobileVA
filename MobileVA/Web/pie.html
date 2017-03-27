@@ -348,8 +348,10 @@ div
 
 
     d3.selectAll("text")
-    .attr("x", donut_diameter + text_padding)
-    .attr("y", 1/2 * donut_diameter)
+    .attr("x", 1/2 * donut_diameter - 20)
+    .attr("y", 1/2 * donut_diameter + 10)
+    .attr("width", 80)
+    .attr("height", 20)
     // .attr("transform",  "translate(" + donut_diameter / 2 + "," + donut_diameter / 2 + ")")
     .style('fill', 'white')
     .style('font-size', '18px');
@@ -388,6 +390,12 @@ div
         });
       }
     });
+
+    function moveToSelectedIndex(index)
+    {
+        var elem = $("li")[index];
+        myScroll.scrollToElement(elem, 500);
+    }
 
 
   </script>
