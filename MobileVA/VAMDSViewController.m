@@ -128,7 +128,7 @@
         [_bridge registerHandler:@"onMDSClick" handler:^(NSDictionary *data, WVJBResponseCallback responseCallback) {
             NSString *selectedPeople = data[@"people"];
             [WToast showWithText:selectedPeople];
-            [self addPerson:selectedPeople];
+            [self togglePerson:selectedPeople];
         }];
     }
 //
@@ -195,15 +195,29 @@
     
 }
 
-- (void)addPerson:(NSString *)personID
+- (void)togglePerson:(NSString *)personID
 {
     VAEgoPerson *egoPerson = [[[VAUtil util] coordinator] egoPersonWithName:personID];
-    if (egoPerson) {
-        [_selectedEgo addObject:egoPerson];
-        if ([_selectedEgo count] > MAX_SELECTED_EGO_LIMIT) {
-            [_selectedEgo removeObjectAtIndex:0];
-        }
+    if (egoPerson == self.dataModel.currentEgoPerson) {
+        [WToast showWithText:@"Unable to remove in-video Ego Person"];
+        return;
     }
+    
+    if (egoPerson) {
+        
+        if ([_selectedEgo containsObject:egoPerson]) {
+            [_selectedEgo removeObject:egoPerson];
+        }
+        else
+        {
+            [_selectedEgo addObject:egoPerson];
+            if ([_selectedEgo count] > MAX_SELECTED_EGO_LIMIT) {
+                [_selectedEgo removeObjectAtIndex:0];
+            }
+        }
+
+    }
+
     
     self.dataModel.selectedEgoPerson = _selectedEgo;
     [_matrixView setMatrixDimension:_selectedEgo.count];
