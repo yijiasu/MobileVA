@@ -36,12 +36,11 @@ const float FACE_DISAPPEAR_TOLERANCE_TIME = 2;
 
 // Web View
 @property (nonatomic, strong) UIWebView *webView;                               // WebView For Donut
-@property (nonatomic, strong) NSMutableArray<UIWebView *> *accompanyViews;             // Collection of WebView For Accompany, which each element has an associated object as its webview bridge
+@property (nonatomic, strong) NSMutableArray<UIWebView *> *accompanyViews;      // Collection of WebView For Accompany, which each element has an associated object as its webview bridge
 
 @property (nonatomic, strong) UIView *touchView;                                // Touch View
 @property (nonatomic, strong) WebViewJavascriptBridge* bridge;                  // JS Bridge For WebView
-@property (nonatomic, strong) WebViewJavascriptBridge* accBridge;                  // JS Bridge For WebView
-
+@property (nonatomic, strong) WebViewJavascriptBridge* accBridge;               // JS Bridge For WebView
 @property (nonatomic, strong) NSTimer *trackingFrameRefreshTimer;
 
 
@@ -49,6 +48,7 @@ const float FACE_DISAPPEAR_TOLERANCE_TIME = 2;
 
 @property (nonatomic, strong) VAEgoPerson *currentEgoPerson;
 @property (nonatomic, strong) NSMutableArray<VAEgoPerson *> *accompanyEgoPersons;
+@property (nonatomic, weak)   VAEgoPerson *currentAccPerson;
 
 @property NSInteger currentYear;
 
@@ -65,6 +65,8 @@ const float FACE_DISAPPEAR_TOLERANCE_TIME = 2;
 @property (weak, nonatomic) IBOutlet UIVisualEffectView *tipView;
 @property (weak, nonatomic) IBOutlet UILabel *egoNameLabel;
 @property (weak, nonatomic) IBOutlet UILabel *tipContentLabel;
+@property (weak, nonatomic) IBOutlet UIButton *changeAccEgoButton;
+@property NSInteger showAccPersonIndex;
 
 // Thumbnail View
 @property (nonatomic, strong) UIVisualEffectView *visEffectView;
@@ -89,6 +91,7 @@ const NSInteger MAX_ACCOMPANY_VIEWS = 1;
     [self configureData];
     [self addObserver:self forKeyPath:@"currentFaceID" options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:NULL];
     [self addObserver:self forKeyPath:@"currentEgoPerson" options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:NULL];
+    [self addObserver:self forKeyPath:@"currentAccPerson" options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:NULL];
     [self.dataModel addObserver:self forKeyPath:@"selectedEgoPerson" options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld) context:NULL];
 
     UIBlurEffect *blurEffect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleLight];
@@ -122,9 +125,12 @@ const NSInteger MAX_ACCOMPANY_VIEWS = 1;
     _tipView.effect = darkBlurEffect;
     [_egoNameLabel removeFromSuperview];
     [_tipContentLabel removeFromSuperview];
+    [_changeAccEgoButton removeFromSuperview];
     
     [_tipView.contentView addSubview:_egoNameLabel];
     [_tipView.contentView addSubview:_tipContentLabel];
+    [_tipView.contentView addSubview:_changeAccEgoButton];
+    
     _tipView.layer.zPosition = MAXFLOAT;
     _tipView.layer.cornerRadius = 6.0f;
     _tipView.clipsToBounds = YES;
@@ -243,7 +249,7 @@ const NSInteger MAX_ACCOMPANY_VIEWS = 1;
 
         if (_webView.alpha != 0) {
             [UIView animateWithDuration:0.3f animations:^{
-                _webView.alpha = 0;
+                _webView.alpha = 0.0;
             }];
         }
         
@@ -252,8 +258,16 @@ const NSInteger MAX_ACCOMPANY_VIEWS = 1;
             NSLog(@"Removed");
             self.currentEgoPerson = nil;
             [self.dataModel removeEgoPersonFromVideo];
-            [self hideAccompanyViews];
-            self.tipView.hidden = YES;
+//            [self hideAccompanyViews];
+            if ([self.accompanyViews count]) {
+                __block CGRect lastAccFrame = self.accompanyViews[0].frame;
+                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                    [self.accompanyViews[0] setFrame:lastAccFrame];
+                });
+                self.tipView.hidden = (self.accompanyViews[0].hidden && self.webView.alpha != 0) && ![self.tipContentLabel.text isEqualToString:@"CONTENT"];
+                
+            }
+
         }
     }
     else
@@ -469,7 +483,13 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
                                   3 * webViewWidth)];
     
     if ([self.dataModel.selectedEgoPerson count] > 1) {
-        [self refreshAccompanyVisWithRadius:_radius];
+        if (_webView.alpha != 0) {
+            [self refreshAccompanyVisWithRadius:_radius];
+        }
+    }
+    
+    if (_tipView) {
+        [self.view bringSubviewToFront:_tipView];
     }
 }
 
@@ -603,6 +623,10 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     {
         [self updateAccompanyViewsWithEgoPersons:change[NSKeyValueChangeNewKey]];
     }
+    else if ([keyPath isEqualToString:@"currentAccPerson"])
+    {
+        [self changeAccEgoPerson:change[NSKeyValueChangeNewKey]];
+    }
 }
 
 - (void)dealloc
@@ -696,9 +720,15 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
     showPersons = [showPersons subarrayWithRange:NSMakeRange(0, MIN(MAX_ACCOMPANY_VIEWS, showPersons.count))];
     
     _accompanyEgoPersons = [showPersons mutableCopy];
-    [showPersons enumerateObjectsUsingBlock:^(VAEgoPerson *  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        [self loadEgoPerson:obj atAccompanyViewIndex:idx];
-    }];
+    
+    if ([_accompanyEgoPersons count]) {
+        self.currentAccPerson = _accompanyEgoPersons[0];
+
+    }
+//    
+//    [showPersons enumerateObjectsUsingBlock:^(VAEgoPerson *  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+//        [self loadEgoPerson:obj atAccompanyViewIndex:idx];
+//    }];
 }
 
 - (void)loadEgoPerson:(VAEgoPerson *)egoPerson atAccompanyViewIndex:(NSInteger)index
@@ -724,7 +754,7 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
 - (void)accompanyEgoPerson:(VAEgoPerson *)egoPerson donutDidSlideToIndex:(NSInteger)index year:(NSInteger)year
 {
     dispatch_async(dispatch_get_main_queue(), ^{
-        [self updateTipViewForEgoPerson:egoPerson selectedYear:year];
+        [self updateTipViewForEgoPerson:_currentAccPerson selectedYear:year];
     });
 
     NSString *yearString = [NSString stringWithFormat:@"%ld", year];
@@ -808,8 +838,9 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
 
             }
             
-            
-            [webview setFrame:newFrame];
+            if (_webView.alpha != 0) {
+                [webview setFrame:newFrame];
+            }
             
             NSString *pieData = [NSString stringWithFormat:@"move(%d,%d,%f)", 0, 0, radius];
             [webview stringByEvaluatingJavaScriptFromString:pieData];
@@ -861,8 +892,44 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
 
 - (void)layoutTipView
 {
-    _egoNameLabel.frame = CGRectMake(0, 4, _tipView.frame.size.width, 20);
-    _tipContentLabel.frame = CGRectMake(0, 22, _tipView.frame.size.width, _tipView.frame.size.height - 20);
+    _egoNameLabel.frame = CGRectMake(8, 4, _tipView.frame.size.width, 20);
+    _tipContentLabel.frame = CGRectMake(8, 22, _tipView.frame.size.width, _tipView.frame.size.height - 20);
+//    _changeAccEgoButton.frame = CGRectMake(_tipView.frame.size.width - _changeAccEgoButton.frame.size.width - 10,
+//                                           _changeAccEgoButton.frame.origin.y,
+//                                           _changeAccEgoButton.frame.size.width,
+//                                           _changeAccEgoButton.frame.size.height);
+    
+}
+
+- (IBAction)onChangeAccEgo:(id)sender
+{
+    NSMutableArray<VAEgoPerson *> *selectablePersons = [self.dataModel.selectedEgoPerson mutableCopy];
+    [selectablePersons removeObject:self.dataModel.currentEgoPerson];
+    
+    UIAlertController *ac = [UIAlertController alertControllerWithTitle:@"Select EgoPerson"
+                                                                message:nil
+                                                         preferredStyle:UIAlertControllerStyleActionSheet];
+    
+    [selectablePersons enumerateObjectsUsingBlock:^(VAEgoPerson * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        [ac addAction:[UIAlertAction actionWithTitle:obj.name
+                                               style:UIAlertActionStyleDefault
+                                             handler:^(UIAlertAction * _Nonnull action) {
+                                                 [self changeAccEgoPerson: obj];
+                                             }]];
+    }];
+    
+    [ac addAction:[UIAlertAction actionWithTitle:@"Cancel"
+                                           style:UIAlertActionStyleCancel
+                                         handler:nil]];
+    
+    [self presentViewController:ac animated:YES completion:nil];
+    
+}
+
+- (void)changeAccEgoPerson:(VAEgoPerson *)egoPerson
+{
+    _currentAccPerson = egoPerson;
+    [self loadEgoPerson:egoPerson atAccompanyViewIndex:0];
 }
 #pragma mark Ego Person Sliding
 

@@ -61,7 +61,7 @@
     }
     
     _viewArray = [NSMutableArray new];
-    CGSize cellSize = CGSizeMake((self.frame.size.width - MATRIX_BORDER_WIDTH) / dim, (self.frame.size.height - MATRIX_BORDER_WIDTH) / dim);
+    CGSize cellSize = CGSizeMake((self.frame.size.width - MATRIX_BORDER_WIDTH * 2) / dim, (self.frame.size.height - MATRIX_BORDER_WIDTH * 2) / dim);
     
     for (int i = 0; i < dim; i++) {
         NSMutableArray *rowArray = [[NSMutableArray alloc] init];

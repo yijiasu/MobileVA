@@ -7,7 +7,7 @@
 //
 
 #import "VAMDSMatrixView.h"
-
+#import "UIColor+Hex.h"
 @implementation VAMDSMatrixView
 
 /*
@@ -45,38 +45,44 @@
     NSDictionary *secondResult = [coordinator queryEgoDistanceForYear:compareYear egoList:egoList];
 
     NSArray *firstCalc = [[self calcMatrixWithQueryResult:firstResult egoList:egoList] mutableCopy];
-    NSArray *secondCalc = [self calcMatrixWithQueryResult:secondResult egoList:egoList];
+//    NSArray *secondCalc = [self calcMatrixWithQueryResult:secondResult egoList:egoList];
     
-    [firstCalc enumerateObjectsUsingBlock:^(NSMutableArray *  _Nonnull subArray, NSUInteger idY, BOOL * _Nonnull stop) {
-        [subArray enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idX, BOOL * _Nonnull stop) {
-            if ([obj integerValue] == -1 || [secondCalc[idY][idX] integerValue] == -1)
-            {
-                [subArray setObject:@(-1) atIndexedSubscript:idX];
-            }
-            else
-            {
-                [subArray setObject:@([obj integerValue] - [secondCalc[idY][idX] integerValue]) atIndexedSubscript:idX];
-            }
-        }];
-    }];
+//    [firstCalc enumerateObjectsUsingBlock:^(NSMutableArray *  _Nonnull subArray, NSUInteger idY, BOOL * _Nonnull stop) {
+//        [subArray enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idX, BOOL * _Nonnull stop) {
+//            if ([obj integerValue] == -1 || [secondCalc[idY][idX] integerValue] == -1)
+//            {
+//                [subArray setObject:@(-1) atIndexedSubscript:idX];
+//            }
+//            else
+//            {
+//                [subArray setObject:@([obj integerValue] - [secondCalc[idY][idX] integerValue]) atIndexedSubscript:idX];
+//            }
+//        }];
+//    }];
     
     [firstCalc enumerateObjectsUsingBlock:^(NSMutableArray *  _Nonnull subArray, NSUInteger idY, BOOL * _Nonnull stop) {
         [subArray enumerateObjectsUsingBlock:^(id  _Nonnull obj, NSUInteger idX, BOOL * _Nonnull stop) {
             VAMatrixCellView *cell = [self getCellAtPoint:CGPointMake(idX, idY)];
             NSInteger value = [obj integerValue];
             if (value > 0) {
-                [cell setBaseColor:[UIColor redColor]];
-            }
-            else if(value < 0)
-            {
-                [cell setBaseColor:[UIColor blueColor]];
+                [cell setBaseColor:[UIColor colorWithHex:0xfeb958]];
+                [cell pushNewValue: 1.0 / (value) * 10000 ];
+                NSLog(@"%lf",  1.0 / (value));
             }
             else
             {
-                [cell setBaseColor:[UIColor whiteColor]];
+                [cell pushNewValue:value];
             }
+
+            //            else if(value == -1)
+//            {
+//                [cell setBaseColor:[UIColor blueColor]];
+//            }
+//            else
+//            {
+//                [cell setBaseColor:[UIColor whiteColor]];
+//            }
             
-            [cell pushNewValue:labs(value)];
         }];
     }];
 
