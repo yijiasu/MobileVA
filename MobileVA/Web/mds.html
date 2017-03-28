@@ -88,7 +88,7 @@
       });
     };
 
-
+    var currentEgoName;
     var currentHighlightNode = null;
     var currentZoomLevel = 0;
     var gBridge;
@@ -101,7 +101,7 @@
     
     function gestureZoomIn()
     {
-      zoomIn("Eitan Grinspun");
+      zoomIn(currentEgoName);
       if (currentZoomLevel == 4)
       {
         return "root";
@@ -109,7 +109,7 @@
     }
     function gestureZoomOut()
     {
-      zoomOut("Eitan Grinspun");
+      zoomOut(currentEgoName);
     }
     function zoomIn(dataKey)
     {
@@ -127,7 +127,6 @@
     function zoomToLevel(dataKey, zoomLevel)
     {
 
-      //Eitan Grinspun
       var node =  $("circle[data-key='"  + dataKey + "']");
       var cx = node.attr("cx");
       var cy = node.attr("cy");
@@ -297,11 +296,18 @@
         svg.attr("height", height);
       }
 
+      if(getParameterByName("egoname") == null)
+      {
+        currentEgoName = "Eitan Grinspun";
+      }
+      else
+      {
+        currentEgoName = decodeURIComponent(getParameterByName("egoname"));
+      }
+
       drawMDS();
       gBridge = bridge;
-      // var dataKey = "Eitan Grinspun";
-      // var node =  $("circle[data-key='"  + dataKey + "']");
-      // node.attr("fill-opacity", "1.0");
+
 
       // Bind Click event
       BridgeService.pipService.onOverviewClicked(angular.element(document.body).scope(), function (msg){
@@ -311,7 +317,7 @@
       });
 
       setTimeout(function(){
-        zoomToLevel("Eitan Grinspun", 4);
+        zoomToLevel(currentEgoName, 4);
         gBridge.callHandler("svgSizeHandler", { w: d3.select("#densityMapCanvas").attr("width"), h: d3.select("#densityMapCanvas").attr("height") }, function responseCallback(responseData) {
           console.log("JS received response:", responseData)
         });

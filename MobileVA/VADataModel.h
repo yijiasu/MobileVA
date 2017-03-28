@@ -19,6 +19,7 @@
 @property NSInteger currentYear;
 @property VAViewControllerType activeViewType;
 @property (nonatomic, strong) UIImage *croppedVideoImage;
+@property (nonatomic, strong) UIImage *MDSEgoPersonImage;
 @property VADonutSlideDirection slidingDirection;                               // 1-> sliding to bottom, -1 -> sliding to top
 @property (nonatomic, strong) NSArray *currentMDSMatrixData;
 
@@ -26,5 +27,7 @@
 - (void)removeEgoPersonFromVideo;
 - (void)capturePersonImage:(UIImage *)image;
 - (NSArray<NSString *> *)egoPersonNameArray;
+- (BOOL)isSelectedEgoPersonWithName:(NSString *)egoPersonName;
+- (void)submitLastImageToMDS;
 
 @end

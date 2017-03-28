@@ -178,6 +178,7 @@ div
       var myScroll;
       var text_padding = 20;
       var text_width = 50;
+      var ignoreNextEvent = false;
 
       $(document).ready(function(){
         
@@ -195,7 +196,10 @@ div
           var currentIndex = -parseInt(myScroll.y / $("svg").height());
           console.log("Current Index = " + currentIndex);
           if (gBridge != null) {
-            gBridge.callHandler("onEgoScrollEnd", {index: currentIndex});
+            if (!ignoreNextEvent)
+            {
+              gBridge.callHandler("onEgoScrollEnd", {index: currentIndex});
+            }
           }
         });
 
@@ -394,7 +398,9 @@ div
     function moveToSelectedIndex(index)
     {
         var elem = $("li")[index];
-        myScroll.scrollToElement(elem, 500);
+        myScroll.scrollToElement(elem, 100);
+        ignoreNextEvent = true;
+        setTimeout(function(){ ignoreNextEvent = false; }, 120);
     }
 
 

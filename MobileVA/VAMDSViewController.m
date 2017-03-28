@@ -46,6 +46,8 @@
     if (self.dataModel) {
         [self.dataModel addObserver:self forKeyPath:@"currentYear" options:(NSKeyValueObservingOptionNew|NSKeyValueObservingOptionOld) context:NULL];
         [self.dataModel addObserver:self forKeyPath:@"selectedEgoPerson" options:(NSKeyValueObservingOptionNew|NSKeyValueObservingOptionOld) context:NULL];
+        [self.dataModel addObserver:self forKeyPath:@"MDSEgoPersonImage" options:(NSKeyValueObservingOptionNew|NSKeyValueObservingOptionOld) context:NULL];
+
     }
     
     
@@ -54,6 +56,9 @@
 - (void)dealloc
 {
     [self.dataModel removeObserver:self forKeyPath:@"currentYear"];
+    [self.dataModel removeObserver:self forKeyPath:@"selectedEgoPerson"];
+    [self.dataModel removeObserver:self forKeyPath:@"MDSEgoPersonImage"];
+
     
 }
 - (void)configureWebView
@@ -105,6 +110,9 @@
 //            [self redrawMatrixViewForYear:_currentYear];
 //        }
         [self refreshEgoDisplay];
+    }
+    else if ([keyPath isEqualToString:@"MDSEgoPersonImage"]) {
+        [self sendImageToWebview:change[NSKeyValueChangeNewKey]];
     }
 }
 
@@ -224,10 +232,26 @@
     NSString *urlString = [[VAService defaultService] URLWithComponent:@"mds.html"
                                                                  width:_MDSViewSize.width
                                                                 height:_MDSViewSize.height
-                                                                params:@{@"year" : [NSString stringWithFormat:@"%ld", _currentYear]}];
+                                                                params:@{@"year" : [NSString stringWithFormat:@"%ld", _currentYear],
+                                                                         @"egoname" : [NSString stringWithFormat:@"%@", self.dataModel.currentEgoPerson.name]}];
     [self.webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:urlString]]];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [self sendImageToWebview:self.dataModel.MDSEgoPersonImage];
+    });
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [self refreshEgoDisplay];
+    });
 
 }
+
+- (void)sendImageToWebview:(UIImage *)imageToSend
+{
+    NSData *imageData = UIImageJPEGRepresentation(imageToSend, 1.0);
+    NSString *encodedString = [imageData base64EncodedStringWithOptions:0];
+    [_webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"setImageData('%@','%@')",self.dataModel.currentEgoPerson.name, encodedString]];
+
+}
+
 
 #pragma mark VAViewController View Size Control
 

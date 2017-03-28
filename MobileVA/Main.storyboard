@@ -249,7 +249,7 @@
                                         </constraints>
                                         <state key="normal" image="add"/>
                                         <connections>
-                                            <action selector="moveDownward:" destination="v27-eE-DbP" eventType="touchUpInside" id="Ynd-Os-haI"/>
+                                            <action selector="onAddCancelEgo:" destination="v27-eE-DbP" eventType="touchUpInside" id="7Gg-zU-D5Y"/>
                                         </connections>
                                     </button>
                                 </subviews>
@@ -307,6 +307,7 @@
                     <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
                     <size key="freeformSize" width="375" height="522"/>
                     <connections>
+                        <outlet property="addCancelButton" destination="dCZ-Uz-Bbr" id="3n1-jV-7Kf"/>
                         <outlet property="coordinationLabel" destination="eeM-z2-8Qq" id="BDE-JL-fXB"/>
                         <outlet property="currentEgoTitle" destination="9M9-Iq-sBd" id="VCe-ya-UM6"/>
                         <outlet property="downButton" destination="XLe-Ir-64y" id="KVl-rl-h6T"/>

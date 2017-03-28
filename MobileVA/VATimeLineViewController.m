@@ -32,6 +32,7 @@
 @property (weak, nonatomic) IBOutlet UIButton *magnifyButton;
 @property (weak, nonatomic) IBOutlet UIButton *upButton;
 @property (weak, nonatomic) IBOutlet UIButton *downButton;
+@property (weak, nonatomic) IBOutlet UIButton *addCancelButton;
 @property (weak, nonatomic) IBOutlet UILabel *egoNameLabel;
 @property (weak, nonatomic) IBOutlet UILabel *coordinationLabel;
 @property (weak, nonatomic) IBOutlet UIImageView *imageView;
@@ -57,6 +58,8 @@
 
 @property BOOL isInitialized;
 @property (nonatomic) BOOL isTimelineLoading;
+
+@property (nonatomic, weak) VAEgoPerson *displayingEgoPerson;
 
 // Matrix
 @property (nonatomic, strong) VATimeLineMatrixView *matrixView;
@@ -144,7 +147,7 @@
     else if ([keyPath isEqualToString:@"selectedEgoPerson"])
     {
         NSLog(@"currentEgoPerson");
-        if (self.dataModel.currentEgoPerson) {
+        if (self.dataModel.currentEgoPerson && _displayingEgoPerson != self.dataModel.currentEgoPerson) {
             [self refreshTimelineWithEgoPerson:self.dataModel.currentEgoPerson];
         }
     }
@@ -190,6 +193,7 @@
     
     _currentEgoTitle.text = [NSString stringWithFormat:@"%@'s Storyline", egoPerson.name];
     [self.webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:urlString]]];
+    _displayingEgoPerson = egoPerson;
     [self setIsTimelineLoading:YES];
     [self hideSlidingWindowAndImageView];
     if (self.dataModel.currentYear) {
@@ -268,6 +272,21 @@
     
     self.arrowButtonEnabled = YES;
     
+    if ([[VAUtil util].coordinator isEgoPersonExisted:nodeKey]) {
+        self.addCancelButton.enabled = YES;
+        if ([self.dataModel isSelectedEgoPersonWithName:nodeKey]) {
+            [self.addCancelButton setImage:[UIImage imageNamed:@"cancel"] forState:UIControlStateNormal];
+        }
+        else
+        {
+            [self.addCancelButton setImage:[UIImage imageNamed:@"add"] forState:UIControlStateNormal];
+        }
+    }
+    else
+    {
+        self.addCancelButton.enabled = NO;
+    }
+    
 }
 
 - (void)unfocusD3Node
@@ -280,6 +299,7 @@
     [_webView stringByEvaluatingJavaScriptFromString:@"unfocus()"];
     
     self.arrowButtonEnabled = NO;
+    self.addCancelButton.enabled = NO;
 }
 
 
@@ -293,6 +313,34 @@
                                       _slidingWindow.frame.size.width,
                                       _slidingWindow.frame.size.height);
     
+}
+
+- (IBAction)onAddCancelEgo:(id)sender
+{
+    VAEgoPerson *egoPerson = [[VAUtil util].coordinator egoPersonWithName:_egoNameLabel.text];
+    if (egoPerson) {
+        NSMutableArray *egoPersons = [self.dataModel.selectedEgoPerson mutableCopy];
+        if ([self.dataModel.selectedEgoPerson containsObject:egoPerson]) {
+            [egoPersons removeObject:egoPerson];
+            [self.addCancelButton setImage:[UIImage imageNamed:@"add"] forState:UIControlStateNormal];
+
+        }
+        else
+        {
+            [egoPersons addObject:egoPerson];
+            if (egoPersons.count > MAX_SELECTED_EGO_LIMIT) {
+                for (VAEgoPerson *e in egoPersons) {
+                    if (![e associatedObject]) {
+                        [egoPersons removeObject:e];
+                        break;
+                    }
+                }
+            }
+            [self.addCancelButton setImage:[UIImage imageNamed:@"cancel"] forState:UIControlStateNormal];
+        }
+        
+        self.dataModel.selectedEgoPerson = egoPersons;
+    }
 }
 
 - (IBAction)onButtonTap:(id)sender {
@@ -477,14 +525,6 @@
     _matrixWidth = width;
     _matrixHeight = height;
     
-    ////    int count = 0;
-    ////    for (int i = 0; i <  width; i++)
-    ////        for (int j = 0; j < height; j++)
-    ////            _egoMatrix[i][j] = ++count; // Or *(*(arr+i)+j) = ++count
-    ////
-    //
-    //
-    //
 }
 
 - (void)printMatrix
@@ -570,6 +610,8 @@
     NSInteger yearDistance = labs(self.dataModel.currentEgoPerson.startYear - self.dataModel.currentYear);
     self.webView.scrollView.contentOffset = CGPointMake((yearDistance - 2) * 100 + 25, 0);
 }
+
+
 
 
 #pragma mark Register JS Handler

@@ -12,6 +12,7 @@
 
 @property (nonatomic, strong) NSArray *dataArray;
 @property (nonatomic, strong) NSMutableArray *egoArray;
+@property (nonatomic, strong) NSMutableArray *egoNameArray;
 @property (nonatomic, strong) NSArray *ovRawArray;
 
 @property (nonatomic, strong) NSMutableDictionary *ovDataDict;
@@ -196,6 +197,25 @@
     {
         [response setStatusCode:404];
         [response respondWithString:@"Object Not Found"];
+    }
+    
+}
+
+- (BOOL)isEgoPersonExisted:(NSString *)egoName
+{
+    if (!_egoNameArray) {
+        _egoNameArray = [NSMutableArray new];
+        [self.allEgoPersons enumerateObjectsUsingBlock:^(VAEgoPerson * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            [_egoNameArray addObject:obj.name];
+        }];
+    }
+    
+    if ([_egoNameArray containsObject:egoName]) {
+        return YES;
+    }
+    else
+    {
+        return NO;
     }
     
 }

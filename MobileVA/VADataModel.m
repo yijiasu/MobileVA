@@ -97,7 +97,10 @@
         }
         
         self.selectedEgoPerson = egoPersons;
+        [self submitLastImageToMDS];
+
     }
+    
 }
 
 - (void)removeEgoPersonFromVideo
@@ -122,6 +125,23 @@
         _slidingDirection = [change[NSKeyValueChangeNewKey] integerValue] - [change[NSKeyValueChangeOldKey] integerValue] > 0 ? VADonutSlideDirectionAsceding : VADonutSlideDirectionDesceding;
         NSLog(@"_slidingDirection = %d", _slidingDirection);
     }
+}
+
+- (BOOL)isSelectedEgoPersonWithName:(NSString *)egoPersonName
+{
+    __block BOOL rtnValue = NO;
+    [_selectedEgoPerson enumerateObjectsUsingBlock:^(VAEgoPerson * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        if ([obj.name isEqualToString:egoPersonName]) {
+            rtnValue = YES;
+        }
+    }];
+    
+    return rtnValue;
+}
+
+- (void)submitLastImageToMDS
+{
+    self.MDSEgoPersonImage = _croppedVideoImage;
 }
 
 @end

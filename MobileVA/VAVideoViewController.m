@@ -670,7 +670,7 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
         
         for (int i = 0; i < MAX_ACCOMPANY_VIEWS; i++) {
             
-            UIWebView *webview = [[UIWebView alloc] initWithFrame:_videoView.frame];
+            UIWebView *webview = [[UIWebView alloc] initWithFrame:CGRectMake(0, 0, 10, 10)];
             webview.delegate = self;
             webview.opaque = NO;
             webview.backgroundColor = [UIColor clearColor];

@@ -18,7 +18,7 @@
 - (NSDictionary *)queryEgoDistanceForYear:(NSInteger)year egoList:(NSArray<NSString *> *)egoList;
 - (NSDictionary *)queryTieStrengthForYear:(NSInteger)year egoList:(NSArray<NSString *> *)egoList;
 - (NSArray<VAEgoPerson *> *)allEgoPersons;
-
+- (BOOL)isEgoPersonExisted:(NSString *)egoName;
 
 // HTTP Server
 - (void)retrieveEgoPersonDataViaRequest:(RouteRequest *)request withResponse:(RouteResponse *)response;
